@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JEPQ Dashboard</title>
+  <meta name="description" content="JEPQ 캔들+볼륨 차트와 핵심 지표를 매일 자동 업데이트로 제공합니다." />
+
+  <link rel="stylesheet" href="assets/style.css" />
+  <!-- TradingView Lightweight Charts -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div class="title">JEPQ</div>
+        <div class="sub">Candles + Volume · Auto-updated (07:00 / 21:00 KST)</div>
+      </div>
+    </div>
+
+    <div class="btns" id="tf">
+      <button data-tf="1D">1D</button>
+      <button data-tf="5D">5D</button>
+      <button data-tf="1M">1M</button>
+      <button data-tf="6M">6M</button>
+      <button data-tf="YTD">YTD</button>
+      <button data-tf="1Y" class="active">1Y</button>
+      <button data-tf="5Y">5Y</button>
+      <button data-tf="MAX">MAX</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card chart-card">
+      <div class="card-head">
+        <div class="left">
+          <div class="h">Price</div>
+          <div class="meta" id="asof">Loading…</div>
+        </div>
+        <div class="right">
+          <div class="pill" id="pricePill">—</div>
+        </div>
+      </div>
+      <div id="chart"></div>
+      <div class="note">
+        ※ 1D/5D는 “일봉 데이터 기준”으로 최근 구간을 보여준다. (추후 분봉 수집으로 실제 1D 구현 가능)
+      </div>
+    </section>
+
+    <aside class="card stats">
+      <div class="h">Key Stats</div>
+      <div class="stat">
+        <div class="k">52 Week Range</div>
+        <div class="v" id="range52">—</div>
+      </div>
+      <div class="stat">
+        <div class="k">Day Range</div>
+        <div class="v" id="range1d">—</div>
+      </div>
+      <div class="stat">
+        <div class="k">Volume</div>
+        <div class="v" id="vol">—</div>
+      </div>
+      <div class="stat">
+        <div class="k">Last Close</div>
+        <div class="v" id="close">—</div>
+      </div>
+      <div class="stat">
+        <div class="k">Change</div>
+        <div class="v" id="chg">—</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="small">
+        데이터 출처: Yahoo Finance 공개 엔드포인트 기반 수집(비공식).<br/>
+        자동 업데이트: GitHub Actions (KST 07:00 / 21:00).
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <span>© JEPQ Dashboard</span>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
