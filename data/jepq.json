@@ -1,6 +1,6 @@
 {
   "ticker": "JEPQ",
-  "updated_utc": "—",
+  "updated_utc": "init",
   "summary": {
     "asof": null,
     "last_close": null,
@@ -12,5 +12,9 @@
     "change": null,
     "change_pct": null
   },
-  "series": []
+  "series": [
+    { "time": 1735689600, "open": 50, "high": 52, "low": 49, "close": 51, "volume": 12000000 },
+    { "time": 1735776000, "open": 51, "high": 53, "low": 50, "close": 52, "volume": 14000000 },
+    { "time": 1735862400, "open": 52, "high": 54, "low": 51, "close": 53, "volume": 16000000 }
+  ]
 }
