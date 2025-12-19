@@ -1,35 +1,46 @@
 <!doctype html>
 <html lang="ko">
-<link rel="canonical" href="https://kkhj218-netizen.github.io/JEPQ251218/" />
-<meta property="og:type" content="website" />
-<meta property="og:title" content="JEPQ Dashboard – 배당/차트/시뮬레이터" />
-<meta property="og:description" content="JEPQ 캔들+볼륨 차트, 52주 위치, 배당(TTM) 요약, 배당 시뮬레이터까지 한 번에." />
-<meta property="og:url" content="https://kkhj218-netizen.github.io/JEPQ251218/" />
-<meta name="twitter:card" content="summary" />
-<meta name="theme-color" content="#0b1220" />
-
-<script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"SoftwareApplication",
-  "name":"JEPQ Dashboard",
-  "applicationCategory":"FinanceApplication",
-  "operatingSystem":"Web",
-  "description":"JEPQ 캔들+볼륨 차트, 52주 위치, 배당(TTM) 요약, 배당 시뮬레이터를 제공하는 웹 대시보드",
-  "url":"https://kkhj218-netizen.github.io/JEPQ251218/"
-}
-</script>
-  
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>JEPQ Dashboard</title>
-  <meta name="description" content="JEPQ 캔들+볼륨 차트와 핵심 지표를 매일 자동 업데이트로 제공합니다." />
+
+  <title>JEPQ Dashboard – 배당/차트/시뮬레이터</title>
+  <meta name="description" content="JEPQ 캔들+볼륨 차트, 52주 위치, 배당(TTM) 요약, 배당 시뮬레이터까지 한 번에." />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://kkhj218-netizen.github.io/JEPQ251218/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="JEPQ Dashboard – 배당/차트/시뮬레이터" />
+  <meta property="og:description" content="JEPQ 캔들+볼륨 차트, 52주 위치, 배당(TTM) 요약, 배당 시뮬레이터까지 한 번에." />
+  <meta property="og:url" content="https://kkhj218-netizen.github.io/JEPQ251218/" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#0b1220" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"SoftwareApplication",
+    "name":"JEPQ Dashboard",
+    "applicationCategory":"FinanceApplication",
+    "operatingSystem":"Web",
+    "description":"JEPQ 캔들+볼륨 차트, 52주 위치, 배당(TTM) 요약, 배당 시뮬레이터를 제공하는 웹 대시보드",
+    "url":"https://kkhj218-netizen.github.io/JEPQ251218/"
+  }
+  </script>
 
   <link rel="stylesheet" href="assets/style.css" />
+
   <!-- TradingView Lightweight Charts -->
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
+
 <body>
   <header class="top">
     <div class="brand">
@@ -53,6 +64,7 @@
   </header>
 
   <main class="grid">
+    <!-- Chart -->
     <section class="card chart-card">
       <div class="card-head">
         <div class="left">
@@ -63,230 +75,195 @@
           <div class="pill" id="pricePill">—</div>
         </div>
       </div>
+
       <div id="chart"></div>
+
       <div class="note">
         ※ 1D/5D는 “일봉 데이터 기준”으로 최근 구간을 보여준다. (추후 분봉 수집으로 실제 1D 구현 가능)
       </div>
     </section>
 
-<aside class="card stats">
-  <div class="h">핵심 지표</div>
+    <!-- Stats / Dividends / Personas / Simulator -->
+    <aside class="card stats">
+      <div class="h">핵심 지표</div>
 
-  <!-- 52W Position -->
-  <div class="stat">
-    <div class="k">52주 위치</div>
-    <div class="v" id="pos52Txt">—</div>
-  </div>
-
-  <div class="pos52">
-    <div class="bar">
-      <div class="fill" id="pos52Fill"></div>
-      <div class="dot" id="pos52Dot"></div>
-    </div>
-    <div class="minmax">
-      <span id="pos52Low">—</span>
-      <span id="pos52High">—</span>
-    </div>
-    <div class="pos52-desc">
-      현재 JEPQ 가격은 최근 1년 가격 범위 기준 <b>상단 구간</b>에 위치해 있습니다.
-      상단 구간에서는 추격 매수보다는 <b>분할 접근</b>이 적합할 수 있습니다.
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- 기존 Key Stats -->
-  <div class="stat">
-    <div class="k">52주 범위</div>
-    <div class="v" id="range52">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">당일 범위</div>
-    <div class="v" id="range1d">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">거래량</div>
-    <div class="v" id="vol">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">종가</div>
-    <div class="v" id="close">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">등락</div>
-    <div class="v" id="chg">—</div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- 배당 카드 -->
-  <div class="h2">배당 요약</div>
-
-  <div class="stat">
-    <div class="k">최근 배당</div>
-    <div class="v" id="lastDiv">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">최근 12개월 배당 합계</div>
-    <div class="v" id="ttmDiv">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">TTM 배당률(추정)</div>
-    <div class="v" id="ttmYield">—</div>
-  </div>
-
-  <div class="mini-list" id="divList"></div>
-
-  <div class="divider"></div>
-
-  <!-- 투자자 해석 카드 (3분기) -->
-  <div class="h2">지금 구간 해석</div>
-
-  <div class="persona-grid">
-    <div class="persona">
-      <div class="t">초보 투자자</div>
-      <div class="d">
-        상단 구간에서는 한 번에 전액보다 <b>분할 매수</b>가 리스크 관리에 유리합니다.
-        배당 ETF는 타이밍보다 <b>유지 기간</b>이 중요합니다.
+      <!-- 52W Position -->
+      <div class="stat">
+        <div class="k">52주 위치</div>
+        <div class="v" id="pos52Txt">—</div>
       </div>
-    </div>
-    <div class="persona">
-      <div class="t">장기 배당 투자자</div>
-      <div class="d">
-        가격 변동에 과도하게 반응하기보다 <b>배당 흐름</b>과 <b>재투자</b> 관점이 유효합니다.
+
+      <div class="pos52">
+        <div class="bar">
+          <div class="fill" id="pos52Fill"></div>
+          <div class="dot" id="pos52Dot"></div>
+        </div>
+        <div class="minmax">
+          <span id="pos52Low">—</span>
+          <span id="pos52High">—</span>
+        </div>
+        <div class="pos52-desc">
+          현재 JEPQ 가격은 최근 1년 가격 범위 기준 <b>상단 구간</b>에 위치해 있습니다.
+          상단 구간에서는 추격 매수보다는 <b>분할 접근</b>이 적합할 수 있습니다.
+        </div>
       </div>
-    </div>
-    <div class="persona">
-      <div class="t">공격형 투자자</div>
-      <div class="d">
-        상단 구간에서는 추격보다 <b>조정 시 분할 접근</b>이 합리적일 수 있습니다.
-        배당과 가격 리스크를 함께 봐야 합니다.
+
+      <div class="divider"></div>
+
+      <!-- Key Stats -->
+      <div class="stat">
+        <div class="k">52주 범위</div>
+        <div class="v" id="range52">—</div>
       </div>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="small">
-    업데이트: <b>KST 07:00 / 21:00</b><br/>
-    데이터 출처: 공개 시장 데이터 기반 자동 수집(비공식).<br/>
-    본 정보는 투자 판단을 돕기 위한 참고 자료이며 투자 권유가 아닙니다.
-  </div>
-</aside>
-
-  <div class="divider"></div>
-
-  <div class="stat">
-    <div class="k">52 Week Range</div>
-    <div class="v" id="range52">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">Day Range</div>
-    <div class="v" id="range1d">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">Volume</div>
-    <div class="v" id="vol">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">Last Close</div>
-    <div class="v" id="close">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">Change</div>
-    <div class="v" id="chg">—</div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- 배당 카드 -->
-  <div class="h2">Dividends</div>
-  <div class="stat">
-    <div class="k">Last Dividend</div>
-    <div class="v" id="lastDiv">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">TTM Dividend</div>
-    <div class="v" id="ttmDiv">—</div>
-  </div>
-  <div class="stat">
-    <div class="k">TTM Yield</div>
-    <div class="v" id="ttmYield">—</div>
-  </div>
-
-  <div class="mini">
-    <div class="mini-head">
-      <span>최근 배당 내역</span>
-      <span class="muted">최대 12개</span>
-    </div>
-    <div class="mini-list" id="divList"></div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- 시뮬레이터 -->
-  <div class="h2">Dividend Simulator</div>
-  <div class="sim">
-    <label class="f">
-      <span>투자금 (KRW)</span>
-      <input id="invKrw" type="number" inputmode="numeric" placeholder="예: 1,000,000" />
-    </label>
-
-    <div class="row2">
-      <label class="f">
-        <span>환율 (KRW/USD)</span>
-        <input id="fx" type="number" step="0.1" inputmode="decimal" placeholder="예: 1350" />
-      </label>
-      <label class="f">
-        <span>매수 단가 (USD)</span>
-        <input id="buyPrice" type="number" step="0.01" inputmode="decimal" placeholder="자동 입력" />
-      </label>
-    </div>
-
-    <div class="row2">
-      <label class="f">
-        <span>기간 (개월)</span>
-        <input id="months" type="number" min="1" max="120" value="12" />
-      </label>
-      <label class="f toggle">
-        <span>배당 재투자</span>
-        <input id="reinvest" type="checkbox" />
-      </label>
-    </div>
-
-    <button class="btn-primary full" id="calcBtn">계산하기</button>
-
-    <div class="sim-out">
-      <div class="o">
-        <div class="k">예상 보유수량</div>
-        <div class="v" id="outShares">—</div>
+      <div class="stat">
+        <div class="k">당일 범위</div>
+        <div class="v" id="range1d">—</div>
       </div>
-      <div class="o">
-        <div class="k">월 평균 배당(추정)</div>
-        <div class="v" id="outMonthly">—</div>
+      <div class="stat">
+        <div class="k">거래량</div>
+        <div class="v" id="vol">—</div>
       </div>
-      <div class="o">
-        <div class="k">기간 누적 배당(추정)</div>
-        <div class="v" id="outTotalDiv">—</div>
+      <div class="stat">
+        <div class="k">종가</div>
+        <div class="v" id="close">—</div>
       </div>
-      <div class="o">
-        <div class="k">재투자 후 수량(추정)</div>
-        <div class="v" id="outSharesEnd">—</div>
+      <div class="stat">
+        <div class="k">등락</div>
+        <div class="v" id="chg">—</div>
       </div>
-    </div>
 
-    <div class="hint">
-      ※ 배당은 최근 12개월(TTM) 기준 평균으로 단순 추정. 실제 배당은 매월 변동 가능.
-    </div>
-  </div>
+      <div class="divider"></div>
 
-  <div class="divider"></div>
+      <!-- Dividends -->
+      <div class="h2">배당 요약</div>
 
-  <div class="small">
-    데이터 출처: Yahoo Finance 공개 엔드포인트 기반 수집(비공식).<br/>
-    자동 업데이트: GitHub Actions (KST 07:00 / 21:00).
-  </div>
-</aside>
+      <div class="stat">
+        <div class="k">최근 배당</div>
+        <div class="v" id="lastDiv">—</div>
+      </div>
+      <div class="stat">
+        <div class="k">최근 12개월 배당 합계</div>
+        <div class="v" id="ttmDiv">—</div>
+      </div>
+      <div class="stat">
+        <div class="k">TTM 배당률(추정)</div>
+        <div class="v" id="ttmYield">—</div>
+      </div>
+
+      <div class="mini-list" id="divList"></div>
+
+      <div class="divider"></div>
+
+      <!-- Personas -->
+      <div class="h2">지금 구간 해석</div>
+
+      <div class="persona-grid">
+        <div class="persona">
+          <div class="t">초보 투자자</div>
+          <div class="d">
+            상단 구간에서는 한 번에 전액보다 <b>분할 매수</b>가 리스크 관리에 유리합니다.
+            배당 ETF는 타이밍보다 <b>유지 기간</b>이 중요합니다.
+          </div>
+        </div>
+        <div class="persona">
+          <div class="t">장기 배당 투자자</div>
+          <div class="d">
+            가격 변동에 과도하게 반응하기보다 <b>배당 흐름</b>과 <b>재투자</b> 관점이 유효합니다.
+          </div>
+        </div>
+        <div class="persona">
+          <div class="t">공격형 투자자</div>
+          <div class="d">
+            상단 구간에서는 추격보다 <b>조정 시 분할 접근</b>이 합리적일 수 있습니다.
+            배당과 가격 리스크를 함께 봐야 합니다.
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Simulator -->
+      <div class="h2">배당 시뮬레이터</div>
+
+      <div class="sim">
+        <label class="f">
+          <span>투자금 (KRW)</span>
+          <input id="invKrw" type="number" inputmode="numeric" placeholder="예: 1000000" />
+        </label>
+
+        <div class="row2">
+          <label class="f">
+            <span>환율 (KRW/USD)</span>
+            <input id="fx" type="number" step="0.1" inputmode="decimal" placeholder="예: 1350" />
+          </label>
+          <label class="f">
+            <span>매수 단가 (USD)</span>
+            <input id="buyPrice" type="number" step="0.01" inputmode="decimal" placeholder="자동 입력" />
+          </label>
+        </div>
+
+        <div class="row2">
+          <label class="f">
+            <span>기간 (개월)</span>
+            <input id="months" type="number" min="1" max="120" value="12" />
+          </label>
+          <label class="f toggle">
+            <span>배당 재투자</span>
+            <input id="reinvest" type="checkbox" />
+          </label>
+        </div>
+
+        <button class="btn-primary full" id="calcBtn">계산하기</button>
+
+        <div class="sim-out">
+          <div class="o">
+            <div class="k">예상 보유수량</div>
+            <div class="v" id="outShares">—</div>
+          </div>
+          <div class="o">
+            <div class="k">월 평균 배당(추정)</div>
+            <div class="v" id="outMonthly">—</div>
+          </div>
+          <div class="o">
+            <div class="k">기간 누적 배당(추정)</div>
+            <div class="v" id="outTotalDiv">—</div>
+          </div>
+          <div class="o">
+            <div class="k">재투자 후 수량(추정)</div>
+            <div class="v" id="outSharesEnd">—</div>
+          </div>
+        </div>
+
+        <div class="hint">
+          ※ 배당은 최근 12개월(TTM) 기준 평균으로 단순 추정. 실제 배당은 매월 변동 가능.
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="small">
+        업데이트: <b>KST 07:00 / 21:00</b><br/>
+        데이터 출처: 공개 시장 데이터 기반 자동 수집(비공식).<br/>
+        본 정보는 투자 판단을 돕기 위한 참고 자료이며 투자 권유가 아닙니다.
+      </div>
+    </aside>
+
+    <!-- SEO Section (B) -->
+    <section class="seo card">
+      <h2>JEPQ 배당 투자자를 위한 데이터 해석 허브</h2>
+      <p>
+        이 페이지는 JEPQ 월배당 ETF의 가격 흐름, 거래량, 52주 위치, 배당 관련 데이터를
+        하루 2회 자동 업데이트(KST 07:00 / 21:00)로 제공합니다.
+      </p>
+      <p>
+        단순한 가격 정보가 아니라, 배당 투자 관점에서 현재 구간을 해석할 수 있도록
+        핵심 지표를 정리해 보여주는 정보 허브를 목표로 합니다.
+      </p>
+      <p class="seo-kws">
+        관련 키워드: JEPQ 배당, JEPQ 월배당, 52주 위치, 배당 ETF 투자 전략, 배당 재투자
+      </p>
+    </section>
+  </main>
 
   <footer class="footer">
     <span>© JEPQ Dashboard</span>
@@ -295,6 +272,3 @@
   <script src="assets/app.js"></script>
 </body>
 </html>
-
-
-
