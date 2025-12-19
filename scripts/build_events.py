@@ -61,8 +61,9 @@ def main():
     }
 
     # 폴더 없으면(일반적으로는 존재) 대비
-    import os
-    os.makedirs("data", exist_ok=True)
+   import os
+os.makedirs("JEPQ251218/data", exist_ok=True)
+
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
