@@ -89,11 +89,12 @@ candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
 });
 
 
-  volSeries = chart.addHistogramSeries({
-    priceFormat: { type: "volume" },
-    priceScaleId: "",
-    scaleMargins: { top: 0.80, bottom: 0 },
-  });
+volSeries = chart.addSeries(LightweightCharts.HistogramSeries, {
+  priceFormat: { type: "volume" },
+  priceScaleId: "",
+  scaleMargins: { top: 0.80, bottom: 0 },
+});
+
 
   chart.timeScale().fitContent();
   window.addEventListener("resize", () => {
@@ -184,5 +185,6 @@ load().catch(err => {
   console.error(err);
   document.getElementById("asof").textContent = "Data load error. Check if data/jepq.json exists.";
 });
+
 
 
