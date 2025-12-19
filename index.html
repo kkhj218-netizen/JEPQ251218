@@ -158,6 +158,45 @@
       <div class="mini-list" id="divList"></div>
 
       <div class="divider"></div>
+<!-- Today Investment Tone -->
+<div class="panel tone-panel">
+  <div class="panel-header">
+    <h2>📍 오늘의 JEPQ 투자 톤</h2>
+    <p class="panel-desc">
+      지표를 종합한 오늘의 행동 가이드
+    </p>
+  </div>
+
+  <div class="tone-box">
+    <div class="tone-status tone-neutral">
+      🟡 중립 (관망 우세)
+    </div>
+
+    <ul class="tone-actions">
+      <li>신규 진입: ❌</li>
+      <li>기존 보유: ⭕</li>
+      <li>분할 매수: ⚠️ 신중</li>
+    </ul>
+
+    <div class="tone-reason">
+      · 거래량 변동성 확대<br/>
+      · 52주 포지션 상단 구간
+    </div>
+  </div>
+</div>
+<!-- 오늘의 투자 톤 카드 아래에 추가 -->
+<section class="panel">
+  <div class="panel-header">
+    <h2>📅 주요 이벤트 D-Day</h2>
+    <p class="panel-desc">
+      JEPQ 변동성에 영향을 줄 수 있는 일정 요약
+    </p>
+  </div>
+
+  <div id="eventsBoard" class="events-grid">
+    <!-- JS가 카드 자동 삽입 -->
+  </div>
+</section>
 
       <!-- Personas -->
       <div class="h2">지금 구간 해석</div>
@@ -277,4 +316,5 @@
   <script src="assets/app.js"></script>
 </body>
 </html>
+
 
