@@ -1,8 +1,8 @@
 /* =========================
-   JEPQ Dashboard app.js (FULL)
+   JEPQ Dashboard app.js (FINAL - overwrite)
    - includes:
      (1) Today Investment Tone
-     (2) Events D-Day Board
+     (2) Events D-Day Board (badge/type + sort + filter)
 ========================= */
 
 const DATA_URL   = "/JEPQ251218/data/jepq.json";
@@ -34,49 +34,69 @@ function fmtPct(n){
 }
 
 /* =========================
-   Tone + Events (ADD)
+   Small utils
 ========================= */
 function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
-function daysUntil(yyyy_mm_dd) {
-  const today = new Date();
-  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const [y,m,d] = String(yyyy_mm_dd).split("-").map(Number);
-  const target = new Date(y, m-1, d);
-  return Math.round((target - t) / (1000*60*60*24));
+function daysUntil(yyyy_mm_dd){
+  try{
+    const today = new Date();
+    const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const [y,m,d] = String(yyyy_mm_dd).split("-").map(Number);
+    const t1 = new Date(y, m-1, d);
+    return Math.round((t1 - t0) / (1000*60*60*24));
+  }catch(_){
+    return null;
+  }
 }
 
-/* ---------- (2) Events Board ---------- */
-async function loadEventsJson() {
-  const res = await fetch(EVENTS_URL, { cache: "no-store" });
+function ddayTag(dday){
+  if (dday === 0) return "D-DAY";
+  if (dday > 0) return `D-${dday}`;
+  return `D+${Math.abs(dday)}`;
+}
+
+/* =========================
+   (2) Events D-Day Board
+========================= */
+async function loadEventsJson(){
+  const res = await fetch(EVENTS_URL, { cache:"no-store" });
   if (!res.ok) throw new Error(`Failed to load ${EVENTS_URL}`);
   return await res.json();
 }
 
-function renderEventsBoard(payload) {
+function renderEventsBoard(payload){
   const wrap = document.getElementById("eventsBoard");
   if (!wrap) return;
 
-  const items = (payload?.events || [])
-    .map(e => ({ ...e, dday: daysUntil(e.date) }))
-    .filter(e => e.dday >= -1)
-    .sort((a,b) => a.dday - b.dday)
-    .slice(0, 8);
+  const list = Array.isArray(payload?.events) ? payload.events : [];
 
-  if (!items.length) {
+  // -1일까지 노출(어제 D+1까지는 안 보이게), 앞으로는 가까운 순 정렬
+  const items = list
+    .map(e => ({ ...e, _dday: daysUntil(e.date) }))
+    .filter(e => typeof e._dday === "number" && e._dday >= -1)
+    .sort((a,b) => a._dday - b._dday)
+    .slice(0, 10);
+
+  if (!items.length){
     wrap.innerHTML = `<div style="opacity:.7;font-size:13px;">이벤트 데이터가 아직 없습니다.</div>`;
     return;
   }
 
   wrap.innerHTML = items.map(e => {
-    const tag = e.dday === 0 ? "D-DAY" : (e.dday > 0 ? `D-${e.dday}` : `D+${Math.abs(e.dday)}`);
-    const badgeClass = (e.category || "").includes("선물") ? "badge-fut" : "badge-opt";
+    const type = (e.type || "").toLowerCase();
+    const isFut = type === "futures";
+    const badgeCls = isFut ? "badge-fut" : "badge-opt";
+    const badgeTxt = isFut ? "FUTURES" : "OPTIONS";
+
+    // D-0/1/2/3 시각적 강조(원하면 CSS로 더 진하게 가능)
+    const urgent = (e._dday <= 3 && e._dday >= 0) ? ` style="border-color: rgba(251,146,60,.28); background: rgba(251,146,60,.06);"` : "";
 
     return `
-      <div class="event-card">
+      <div class="event-card"${urgent}>
         <div class="event-top">
-          <span class="badge ${badgeClass}">${e.category || "이벤트"}</span>
-          <span class="dday">${tag}</span>
+          <span class="badge ${badgeCls}">${badgeTxt}</span>
+          <span class="dday">${ddayTag(e._dday)}</span>
         </div>
         <div class="event-title">${e.title || "-"}</div>
         <div class="event-date">${e.date || "-"}</div>
@@ -90,15 +110,17 @@ async function initEventsBoard(){
   try{
     const payload = await loadEventsJson();
     renderEventsBoard(payload);
-  }catch(e){
-    console.warn(e);
+  }catch(err){
+    console.warn(err);
     const wrap = document.getElementById("eventsBoard");
     if (wrap) wrap.innerHTML = `<div style="opacity:.7;font-size:13px;">events.json 로드 실패</div>`;
   }
 }
 
-/* ---------- (1) Today Investment Tone ---------- */
-function computeTone(summary = {}, derived = {}) {
+/* =========================
+   (1) Today Investment Tone
+========================= */
+function computeTone(summary = {}, derived = {}){
   // 유연하게 읽기
   const pos52 = (derived?.pos_52w_pct ?? derived?.pos52 ?? null); // 0~100
   const riskScore = (derived?.risk_score ?? derived?.score ?? null); // 0~100 가정
@@ -108,25 +130,25 @@ function computeTone(summary = {}, derived = {}) {
   let score = 50;
   const reasons = [];
 
-  if (typeof riskScore === "number") {
+  if (typeof riskScore === "number"){
     score = riskScore;
     reasons.push(`리스크 점수 ${Math.round(riskScore)}`);
   }
 
-  if (typeof pos52 === "number") {
-    if (pos52 >= 85) { score += 12; reasons.push(`52주 상단(${Math.round(pos52)}%)`); }
-    else if (pos52 <= 30) { score -= 8; reasons.push(`52주 하단(${Math.round(pos52)}%)`); }
+  if (typeof pos52 === "number"){
+    if (pos52 >= 85){ score += 12; reasons.push(`52주 상단(${Math.round(pos52)}%)`); }
+    else if (pos52 <= 30){ score -= 8; reasons.push(`52주 하단(${Math.round(pos52)}%)`); }
     else { reasons.push(`52주 중간(${Math.round(pos52)}%)`); }
   }
 
-  if (typeof volPct === "number") {
-    if (volPct >= 30) { score += 10; reasons.push(`거래량 급증(+${Math.round(volPct)}%)`); }
-    else if (volPct >= 10) { score += 5; reasons.push(`거래량 증가(+${Math.round(volPct)}%)`); }
+  if (typeof volPct === "number"){
+    if (volPct >= 30){ score += 10; reasons.push(`거래량 급증(+${Math.round(volPct)}%)`); }
+    else if (volPct >= 10){ score += 5; reasons.push(`거래량 증가(+${Math.round(volPct)}%)`); }
   }
 
-  if (typeof dayChg === "number") {
-    if (dayChg <= -2) { score += 8; reasons.push(`당일 하락(${dayChg.toFixed(1)}%)`); }
-    else if (dayChg >= 2) { score -= 4; reasons.push(`당일 상승(+${dayChg.toFixed(1)}%)`); }
+  if (typeof dayChg === "number"){
+    if (dayChg <= -2){ score += 8; reasons.push(`당일 하락(${dayChg.toFixed(1)}%)`); }
+    else if (dayChg >= 2){ score -= 4; reasons.push(`당일 상승(+${dayChg.toFixed(1)}%)`); }
   }
 
   score = clamp(score, 0, 100);
@@ -135,11 +157,11 @@ function computeTone(summary = {}, derived = {}) {
   let toneClass = "neutral";
   let action = { entry:"⚠️ 신중", hold:"⭕", dca:"⚠️ 신중" };
 
-  if (score <= 30) {
+  if (score <= 30){
     toneLabel = "🔵 안정 (적립 유리)";
     toneClass = "safe";
     action = { entry:"⭕", hold:"⭕", dca:"⭕" };
-  } else if (score <= 60) {
+  } else if (score <= 60){
     toneLabel = "🟡 중립 (관망 우세)";
     toneClass = "neutral";
     action = { entry:"⚠️ 신중", hold:"⭕", dca:"⚠️ 신중" };
@@ -156,7 +178,7 @@ function computeTone(summary = {}, derived = {}) {
   return { score, toneLabel, toneClass, action, reasonText };
 }
 
-function renderTone(summary, derived) {
+function renderTone(summary, derived){
   const statusEl = document.getElementById("toneStatus");
   const actionsEl = document.getElementById("toneActions");
   const reasonEl = document.getElementById("toneReason");
@@ -303,9 +325,9 @@ function renderStats(summary){
   }
 }
 
-/**
- * ✅ 52W Position + 태그 + 문구 자동 변경
- */
+/* =========================
+   52W Position
+========================= */
 function render52wPosition(summary, derived){
   const pos = derived?.pos_52w_pct; // 0~100
   const lo = summary?.range_52w_low;
@@ -336,7 +358,7 @@ function render52wPosition(summary, derived){
     return;
   }
 
-  const p = Math.max(0, Math.min(100, pos));
+  const p = clamp(pos, 0, 100);
   txt.textContent = `${p.toFixed(1)}%`;
   fill.style.width = `${p}%`;
   dot.style.left = `${p}%`;
@@ -368,12 +390,14 @@ function render52wPosition(summary, derived){
   }
 }
 
+/* =========================
+   Dividends
+========================= */
 function renderDividends(divSummary, dividends){
   const lastDivEl = document.getElementById("lastDiv");
   const ttmDivEl = document.getElementById("ttmDiv");
   const ttmYieldEl = document.getElementById("ttmYield");
   const listEl = document.getElementById("divList");
-
   if (!lastDivEl || !ttmDivEl || !ttmYieldEl || !listEl) return;
 
   const lastAmt = divSummary?.last_dividend;
@@ -383,13 +407,8 @@ function renderDividends(divSummary, dividends){
     ? `${fmtUsd(lastAmt)} · ${lastDate}`
     : "—";
 
-  ttmDivEl.textContent = divSummary?.ttm_dividend != null
-    ? fmtUsd(divSummary.ttm_dividend)
-    : "—";
-
-  ttmYieldEl.textContent = divSummary?.ttm_yield_pct != null
-    ? fmtPct(divSummary.ttm_yield_pct)
-    : "—";
+  ttmDivEl.textContent = divSummary?.ttm_dividend != null ? fmtUsd(divSummary.ttm_dividend) : "—";
+  ttmYieldEl.textContent = divSummary?.ttm_yield_pct != null ? fmtPct(divSummary.ttm_yield_pct) : "—";
 
   listEl.innerHTML = "";
   const items = (dividends || []).slice(-12).reverse();
@@ -405,6 +424,9 @@ function renderDividends(divSummary, dividends){
   }
 }
 
+/* =========================
+   Simulator
+========================= */
 function calcSimulator(raw){
   const close = raw?.summary?.last_close;
   const divMonthly = raw?.dividend_summary?.monthly_avg_dividend;
@@ -449,9 +471,7 @@ function calcSimulator(raw){
   for (let i=0; i<m; i++){
     const div = sharesEnd * divMonthly;
     totalDivUsd += div;
-    if (doRe){
-      sharesEnd += (div / price);
-    }
+    if (doRe) sharesEnd += (div / price);
   }
 
   outShares.textContent = `${shares0.toFixed(4)} shares`;
@@ -460,6 +480,9 @@ function calcSimulator(raw){
   outSharesEnd.textContent = doRe ? `${sharesEnd.toFixed(4)} shares` : "— (재투자 꺼짐)";
 }
 
+/* =========================
+   Set chart data
+========================= */
 function setData(series){
   if (!candleSeries || !volSeries || !chart) return;
 
@@ -482,12 +505,12 @@ function setData(series){
    Main load
 ========================= */
 async function load(){
-  const res = await fetch(DATA_URL, { cache: "no-store" });
+  const res = await fetch(DATA_URL, { cache:"no-store" });
   if (!res.ok) throw new Error(`Failed to load ${DATA_URL}`);
   raw = await res.json();
 
   raw.summary = raw.summary || {};
-  raw.series = raw.series || [];
+  raw.series  = raw.series  || [];
 
   ensureChart();
 
@@ -495,10 +518,10 @@ async function load(){
   render52wPosition(raw.summary, raw.derived);
   renderDividends(raw.dividend_summary, raw.dividends);
 
-  // ✅ (1) 오늘의 투자 톤 자동 생성
+  // (1) Tone
   renderTone(raw.summary, raw.derived);
 
-  // ✅ (2) 이벤트 D-Day 보드 로딩
+  // (2) Events
   initEventsBoard();
 
   // default 1Y
@@ -540,75 +563,3 @@ load().catch(err => {
   const asof = document.getElementById("asof");
   if (asof) asof.textContent = "데이터 로드 오류: data/jepq.json 경로를 확인해줘.";
 });
-
-// ===============================
-// Events Board (options / futures)
-// ===============================
-const EVENTS_URL = "/JEPQ251218/data/events.json";
-
-function ddayLabel(yyyy_mm_dd){
-  const today = new Date();
-  const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const [y,m,d] = yyyy_mm_dd.split("-").map(Number);
-  const t1 = new Date(y, m-1, d);
-  const diff = Math.round((t1 - t0) / (1000*60*60*24));
-  if (diff === 0) return "D-DAY";
-  if (diff > 0) return `D-${diff}`;
-  return `D+${Math.abs(diff)}`;
-}
-
-function renderEventsBoard(events){
-  const board = document.getElementById("eventsBoard");
-  if (!board) return;
-
-  board.innerHTML = "";
-  const top = (events || []).slice(0, 10);
-
-  if (!top.length){
-    board.innerHTML = `
-      <div class="event-card">
-        <div class="event-title">이벤트 데이터가 없습니다</div>
-      </div>`;
-    return;
-  }
-
-  for (const e of top){
-    const badgeCls = e.type === "options" ? "badge-opt" : "badge-fut";
-    const badgeTxt = e.type === "options" ? "OPTIONS" : "FUTURES";
-
-    const card = document.createElement("div");
-    card.className = "event-card";
-    card.innerHTML = `
-      <div class="event-top">
-        <span class="badge ${badgeCls}">${badgeTxt}</span>
-        <span class="dday">${ddayLabel(e.date)}</span>
-      </div>
-      <div class="event-title">${e.title}</div>
-      <div class="event-date">${e.date}</div>
-      <div class="event-note">${e.note || ""}</div>
-    `;
-    board.appendChild(card);
-  }
-}
-
-async function loadEvents(){
-  try{
-    const res = await fetch(EVENTS_URL, { cache:"no-store" });
-    if (!res.ok) throw new Error("events.json load fail");
-    const data = await res.json();
-    renderEventsBoard(data.events || []);
-  }catch(err){
-    console.error(err);
-    const board = document.getElementById("eventsBoard");
-    if (board){
-      board.innerHTML = `
-        <div class="event-card">
-          <div class="event-title">events.json 로드 오류</div>
-        </div>`;
-    }
-  }
-}
-loadEvents();
-ㄹ
-
-
