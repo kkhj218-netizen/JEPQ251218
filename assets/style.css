@@ -324,4 +324,217 @@ body{
   .sim-out{ grid-template-columns:1fr; }
 }
 
+/* =========================
+   Premium-feel Add-ons (1~7)
+========================= */
+
+/* (6) chart toggle */
+.chart-toggle{
+  margin: 6px 0 10px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  color: rgba(229,231,235,.95);
+  padding: 8px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+}
+#chartWrap.is-collapsed #chart{ display:none; }
+#chartWrap.is-collapsed .note{ display:none; }
+
+/* (1) Today Decision Card */
+.decision-card{
+  margin-top: 12px;
+  padding: 14px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+}
+.dc-title{
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+.dc-text{
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(229,231,235,.92);
+  word-break: keep-all;
+}
+.dc-text b{ color:#fff; font-weight: 900; }
+.dc-sub{
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: .75;
+  line-height: 1.4;
+}
+
+/* mobile: 결론 카드 “고정 느낌”(유료 감성) */
+@media (max-width: 640px){
+  .decision-card{
+    position: sticky;
+    top: 10px;
+    z-index: 5;
+    backdrop-filter: blur(8px);
+  }
+}
+
+/* LEFT 아래 필수정보 카드 */
+.below-card{
+  margin-top: 12px;
+  padding: 14px;
+}
+.below-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.mini-card{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  border-radius: 14px;
+  padding: 12px 12px;
+}
+.mini-card .k{ font-size: 12px; opacity: .72; }
+.mini-card .v{ font-size: 14px; font-weight: 900; margin-top: 6px; }
+.mini-card .s{ font-size: 12px; opacity: .70; margin-top: 6px; line-height: 1.35; }
+.mini-card.wide{ grid-column: 1 / -1; }
+
+@media (max-width: 960px){
+  .below-grid{ grid-template-columns: 1fr; }
+}
+
+/* (5) Alerts */
+.alerts-box{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.alert-item{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.alert-item:last-child{ border-bottom:none; }
+.alert-badge{
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  white-space: nowrap;
+}
+.alert-badge.high{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12); }
+.alert-badge.mid{ border-color: rgba(251,146,60,.35); background: rgba(251,146,60,.12); }
+.alert-badge.low{ border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12); }
+
+/* (3) Position panel */
+.pos-form{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  border-radius: 14px;
+  padding: 12px;
+}
+.pf{ display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+.pf span{ font-size: 12px; opacity:.75; }
+.pos-form input{
+  width:100%;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.18);
+  color: rgba(229,231,235,.95);
+  outline:none;
+}
+.pos-form input:focus{
+  border-color: rgba(251,146,60,.55);
+  box-shadow: 0 0 0 3px rgba(251,146,60,.12);
+}
+.btn-secondary{
+  border: 1px solid rgba(251,146,60,.55);
+  background: rgba(251,146,60,.12);
+  color: rgba(229,231,235,.95);
+  padding: 10px 10px;
+  border-radius: 12px;
+  cursor:pointer;
+  font-weight: 900;
+}
+.btn-ghost{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  color: rgba(229,231,235,.90);
+  padding: 10px 10px;
+  border-radius: 12px;
+  cursor:pointer;
+  font-weight: 800;
+}
+.pos-out{
+  margin-top: 10px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.pos-out .po{
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.14);
+}
+.pos-out .po .k{ font-size:12px; opacity:.72; margin-bottom:6px; }
+.pos-out .po .v{ font-size:14px; font-weight:900; }
+.pos-out .po.wide{ grid-column: 1 / -1; }
+@media (max-width: 960px){
+  .pos-out{ grid-template-columns: 1fr; }
+}
+
+/* (2) Events scroll on mobile (타임라인 느낌) */
+.events-scroll{
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+@media (max-width: 640px){
+  .events-grid{
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(240px, 1fr);
+    display: grid;
+    grid-template-columns: unset;
+  }
+}
+
+/* events: impact + stats line */
+.event-impact{
+  display:flex;
+  align-items:center;
+  gap: 6px;
+  font-size: 12px;
+  opacity: .9;
+}
+.dots{ letter-spacing: 1px; }
+.dots.high{ color: rgba(239,68,68,.95); }
+.dots.mid{ color: rgba(251,146,60,.95); }
+.dots.low{ color: rgba(34,197,94,.95); }
+.event-statline{
+  font-size: 12px;
+  opacity: .78;
+  line-height: 1.35;
+}
+
+/* (4) pos52 stats */
+.pos52-stats{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+
 
