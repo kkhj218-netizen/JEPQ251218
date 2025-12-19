@@ -159,7 +159,6 @@ function render52wPosition(summary, derived){
   const tagEl  = document.getElementById("pos52Tag");
   const msgEl  = document.querySelector(".pos52-callout .msg");
 
-  // HTML이 아직 없으면 조용히 패스
   if (!lowEl || !highEl || !txt || !fill || !dot) return;
 
   lowEl.textContent  = lo != null ? fmtPrice(lo) : "—";
@@ -173,7 +172,7 @@ function render52wPosition(summary, derived){
       tagEl.textContent = "—";
       tagEl.classList.remove("is-low","is-mid","is-high");
     }
-    if (msgEl) msgEl.innerHTML = `52주 위치 데이터를 불러오는 중입니다.`;
+    if (msgEl) msgEl.textContent = "52주 위치를 계산 중입니다.";
     return;
   }
 
@@ -182,39 +181,33 @@ function render52wPosition(summary, derived){
   fill.style.width = `${p}%`;
   dot.style.left = `${p}%`;
 
-  // 구간 분류
   let zone = "mid";
   if (p < 35) zone = "low";
   else if (p >= 70) zone = "high";
 
-  // 태그
   if (tagEl){
     tagEl.classList.remove("is-low","is-mid","is-high");
     tagEl.classList.add(zone === "low" ? "is-low" : zone === "high" ? "is-high" : "is-mid");
-
-    tagEl.textContent =
-      zone === "low" ? "하단 구간" :
-      zone === "high" ? "상단 구간" :
-      "중단 구간";
+    tagEl.textContent = zone === "low" ? "하단 구간" : zone === "high" ? "상단 구간" : "중단 구간";
   }
 
-  // 문구
   if (msgEl){
     if (zone === "high"){
       msgEl.innerHTML =
-        `현재 JEPQ 가격은 최근 1년 가격 범위 기준 <b>상단 구간</b>에 위치해 있습니다.<br/>
-         상단 구간에서는 <b>추격 매수</b>보다는 <b>분할 접근</b>이 적합할 수 있습니다.`;
+        `현재 가격은 52주 범위 중 <b>상위 ${p.toFixed(0)}%</b>에 있어요.<br/>
+         이 구간은 <b>추격</b>보다 <b>분할 접근</b>이 안전할 수 있어요.`;
     } else if (zone === "low"){
       msgEl.innerHTML =
-        `현재 JEPQ 가격은 최근 1년 가격 범위 기준 <b>하단 구간</b>에 위치해 있습니다.<br/>
-         하단 구간에서는 <b>분할 매수</b> 관점이 유효할 수 있고, 변동성 대비 <b>매수 간격</b>을 두는 것이 좋습니다.`;
+        `현재 가격은 52주 범위 중 <b>하위 ${Math.max(0, 100 - p).toFixed(0)}%</b> 근처예요.<br/>
+         변동성은 커질 수 있으니 <b>분할</b>로 접근하고, 배당 흐름을 같이 확인해요.`;
     } else {
       msgEl.innerHTML =
-        `현재 JEPQ 가격은 최근 1년 가격 범위 기준 <b>중단 구간</b>에 위치해 있습니다.<br/>
-         중단 구간에서는 <b>정기 적립/분할</b>로 평균 단가를 관리하면서 <b>배당 흐름</b>을 함께 보는 전략이 무난합니다.`;
+        `현재 가격은 52주 범위의 <b>중간대</b>에 있어요.<br/>
+         무리한 타이밍보다 <b>정기 적립/분할</b>로 평균단가를 관리하기 좋아요.`;
     }
   }
 }
+
 
 function renderDividends(divSummary, dividends){
   const lastDivEl = document.getElementById("lastDiv");
@@ -381,3 +374,4 @@ load().catch(err => {
   const asof = document.getElementById("asof");
   if (asof) asof.textContent = "데이터 로드 오류: data/jepq.json 경로를 확인해줘.";
 });
+
