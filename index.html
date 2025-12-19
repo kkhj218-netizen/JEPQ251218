@@ -49,37 +49,138 @@
       </div>
     </section>
 
-    <aside class="card stats">
-      <div class="h">Key Stats</div>
-      <div class="stat">
-        <div class="k">52 Week Range</div>
-        <div class="v" id="range52">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">Day Range</div>
-        <div class="v" id="range1d">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">Volume</div>
-        <div class="v" id="vol">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">Last Close</div>
-        <div class="v" id="close">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">Change</div>
-        <div class="v" id="chg">—</div>
-      </div>
+<aside class="card stats">
+  <div class="h">Key Stats</div>
 
-      <div class="divider"></div>
+  <!-- 52주 위치 -->
+  <div class="stat">
+    <div class="k">52W Position</div>
+    <div class="v"><span id="pos52Txt">—</span></div>
+  </div>
+  <div class="posbar" aria-label="52 week position">
+    <div class="posbar-track">
+      <div class="posbar-fill" id="pos52Fill" style="width:0%"></div>
+      <div class="posbar-dot" id="pos52Dot" style="left:0%"></div>
+    </div>
+    <div class="posbar-meta">
+      <span id="pos52Low">—</span>
+      <span id="pos52High">—</span>
+    </div>
+  </div>
 
-      <div class="small">
-        데이터 출처: Yahoo Finance 공개 엔드포인트 기반 수집(비공식).<br/>
-        자동 업데이트: GitHub Actions (KST 07:00 / 21:00).
+  <div class="divider"></div>
+
+  <div class="stat">
+    <div class="k">52 Week Range</div>
+    <div class="v" id="range52">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">Day Range</div>
+    <div class="v" id="range1d">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">Volume</div>
+    <div class="v" id="vol">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">Last Close</div>
+    <div class="v" id="close">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">Change</div>
+    <div class="v" id="chg">—</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 배당 카드 -->
+  <div class="h2">Dividends</div>
+  <div class="stat">
+    <div class="k">Last Dividend</div>
+    <div class="v" id="lastDiv">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">TTM Dividend</div>
+    <div class="v" id="ttmDiv">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">TTM Yield</div>
+    <div class="v" id="ttmYield">—</div>
+  </div>
+
+  <div class="mini">
+    <div class="mini-head">
+      <span>최근 배당 내역</span>
+      <span class="muted">최대 12개</span>
+    </div>
+    <div class="mini-list" id="divList"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 시뮬레이터 -->
+  <div class="h2">Dividend Simulator</div>
+  <div class="sim">
+    <label class="f">
+      <span>투자금 (KRW)</span>
+      <input id="invKrw" type="number" inputmode="numeric" placeholder="예: 1,000,000" />
+    </label>
+
+    <div class="row2">
+      <label class="f">
+        <span>환율 (KRW/USD)</span>
+        <input id="fx" type="number" step="0.1" inputmode="decimal" placeholder="예: 1350" />
+      </label>
+      <label class="f">
+        <span>매수 단가 (USD)</span>
+        <input id="buyPrice" type="number" step="0.01" inputmode="decimal" placeholder="자동 입력" />
+      </label>
+    </div>
+
+    <div class="row2">
+      <label class="f">
+        <span>기간 (개월)</span>
+        <input id="months" type="number" min="1" max="120" value="12" />
+      </label>
+      <label class="f toggle">
+        <span>배당 재투자</span>
+        <input id="reinvest" type="checkbox" />
+      </label>
+    </div>
+
+    <button class="btn-primary full" id="calcBtn">계산하기</button>
+
+    <div class="sim-out">
+      <div class="o">
+        <div class="k">예상 보유수량</div>
+        <div class="v" id="outShares">—</div>
       </div>
-    </aside>
-  </main>
+      <div class="o">
+        <div class="k">월 평균 배당(추정)</div>
+        <div class="v" id="outMonthly">—</div>
+      </div>
+      <div class="o">
+        <div class="k">기간 누적 배당(추정)</div>
+        <div class="v" id="outTotalDiv">—</div>
+      </div>
+      <div class="o">
+        <div class="k">재투자 후 수량(추정)</div>
+        <div class="v" id="outSharesEnd">—</div>
+      </div>
+    </div>
+
+    <div class="hint">
+      ※ 배당은 최근 12개월(TTM) 기준 평균으로 단순 추정. 실제 배당은 매월 변동 가능.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="small">
+    데이터 출처: Yahoo Finance 공개 엔드포인트 기반 수집(비공식).<br/>
+    자동 업데이트: GitHub Actions (KST 07:00 / 21:00).
+  </div>
+</aside>
 
   <footer class="footer">
     <span>© JEPQ Dashboard</span>
@@ -88,3 +189,4 @@
   <script src="assets/app.js"></script>
 </body>
 </html>
+
