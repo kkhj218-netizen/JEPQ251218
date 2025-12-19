@@ -399,3 +399,114 @@ body{
   .persona-grid{ grid-template-columns: repeat(3, 1fr); }
 }
 
+/* ===== 52주 위치 게이지 UI ===== */
+.pos52 { margin-top: 10px; }
+
+.pos52 .bar{
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.pos52 .fill{
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    rgba(34,197,94,.55),
+    rgba(251,146,60,.55),
+    rgba(239,68,68,.55)
+  );
+  transition: width .35s ease;
+}
+
+.pos52 .dot{
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: rgba(251,146,60,.95);
+  box-shadow: 0 0 0 4px rgba(251,146,60,.20);
+  border: 1px solid rgba(0,0,0,.25);
+  transition: left .35s ease;
+}
+
+.pos52 .minmax{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: rgba(229,231,235,.75);
+}
+
+.pos52 .minmax b{
+  font-size: 13px;
+  color: rgba(229,231,235,.95);
+}
+
+.stat .v{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.tag{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: rgba(229,231,235,.9);
+  white-space: nowrap;
+}
+
+.tag.is-low{
+  border-color: rgba(34,197,94,.35);
+  background: rgba(34,197,94,.12);
+  color: rgba(34,197,94,.95);
+}
+.tag.is-mid{
+  border-color: rgba(251,146,60,.35);
+  background: rgba(251,146,60,.12);
+  color: rgba(251,146,60,.95);
+}
+.tag.is-high{
+  border-color: rgba(239,68,68,.35);
+  background: rgba(239,68,68,.12);
+  color: rgba(239,68,68,.95);
+}
+
+.pos52-callout{
+  margin-top: 12px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.18);
+}
+
+.pos52-callout .msg{
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(229,231,235,.90);
+}
+
+.pos52-callout .msg b{
+  color: rgba(229,231,235,1);
+  font-weight: 800;
+}
+
+/* 모바일에서 가독성 + 터치 */
+@media (max-width: 640px){
+  .pos52-callout .msg{ font-size: 14px; }
+  .tag{ padding: 6px 9px; }
+}
+
+
