@@ -180,11 +180,144 @@ async function load(){
     setData(s);
   });
 }
+function fmtUsd(n){
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return `$${Number(n).toFixed(2)}`;
+}
+function fmtPct(n){
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return `${Number(n).toFixed(2)}%`;
+}
+
+function render52wPosition(summary, derived){
+  const pos = derived?.pos_52w_pct;
+  const lo = summary?.range_52w_low;
+  const hi = summary?.range_52w_high;
+
+  document.getElementById("pos52Low").textContent = lo != null ? fmtPrice(lo) : "—";
+  document.getElementById("pos52High").textContent = hi != null ? fmtPrice(hi) : "—";
+
+  const txt = document.getElementById("pos52Txt");
+  const fill = document.getElementById("pos52Fill");
+  const dot  = document.getElementById("pos52Dot");
+
+  if (pos == null){
+    txt.textContent = "—";
+    fill.style.width = "0%";
+    dot.style.left = "0%";
+    return;
+  }
+  const p = Math.max(0, Math.min(100, pos));
+  txt.textContent = `${p.toFixed(1)}%`;
+  fill.style.width = `${p}%`;
+  dot.style.left = `${p}%`;
+}
+
+function renderDividends(divSummary, dividends){
+  const lastDivEl = document.getElementById("lastDiv");
+  const ttmDivEl = document.getElementById("ttmDiv");
+  const ttmYieldEl = document.getElementById("ttmYield");
+  const listEl = document.getElementById("divList");
+
+  const lastAmt = divSummary?.last_dividend;
+  const lastDate = divSummary?.last_dividend_date;
+
+  lastDivEl.textContent = (lastAmt != null && lastDate)
+    ? `${fmtUsd(lastAmt)} · ${lastDate}`
+    : "—";
+
+  ttmDivEl.textContent = divSummary?.ttm_dividend != null
+    ? fmtUsd(divSummary.ttm_dividend)
+    : "—";
+
+  ttmYieldEl.textContent = divSummary?.ttm_yield_pct != null
+    ? fmtPct(divSummary.ttm_yield_pct)
+    : "—";
+
+  // list last 12
+  listEl.innerHTML = "";
+  const items = (dividends || []).slice(-12).reverse();
+  if (!items.length){
+    listEl.innerHTML = `<div class="mini-item"><span class="d">—</span><span class="a">No dividend data</span></div>`;
+    return;
+  }
+  for (const d of items){
+    const row = document.createElement("div");
+    row.className = "mini-item";
+    row.innerHTML = `<span class="d">${d.date}</span><span class="a">${fmtUsd(d.amount)}</span>`;
+    listEl.appendChild(row);
+  }
+}
+
+function calcSimulator(raw){
+  const close = raw?.summary?.last_close;
+  const divMonthly = raw?.dividend_summary?.monthly_avg_dividend; // USD per share per month (avg)
+  const ttmDiv = raw?.dividend_summary?.ttm_dividend;
+
+  // default inputs
+  const invKrw = document.getElementById("invKrw");
+  const fx = document.getElementById("fx");
+  const buyPrice = document.getElementById("buyPrice");
+  const months = document.getElementById("months");
+  const reinvest = document.getElementById("reinvest");
+
+  // 자동 채우기
+  if (buyPrice.value.trim() === "" && close != null) buyPrice.value = close.toFixed(2);
+  if (fx.value.trim() === "") fx.value = "1350";
+
+  const inv = Number(invKrw.value || 0);
+  const fxv = Number(fx.value || 0);
+  const price = Number(buyPrice.value || 0);
+  const m = Math.max(1, Number(months.value || 12));
+  const doRe = !!reinvest.checked;
+
+  const outShares = document.getElementById("outShares");
+  const outMonthly = document.getElementById("outMonthly");
+  const outTotalDiv = document.getElementById("outTotalDiv");
+  const outSharesEnd = document.getElementById("outSharesEnd");
+
+  if (!inv || !fxv || !price || !divMonthly){
+    outShares.textContent = "—";
+    outMonthly.textContent = "—";
+    outTotalDiv.textContent = "—";
+    outSharesEnd.textContent = "—";
+    return;
+  }
+
+  // KRW -> USD
+  const usd = inv / fxv;
+  let shares = usd / price;
+
+  // 월 평균 배당(추정)
+  const monthlyDivUsd = shares * divMonthly;
+
+  // 누적 배당 / 재투자
+  let totalDivUsd = 0;
+  let sharesEnd = shares;
+
+  for (let i=0; i<m; i++){
+    const div = sharesEnd * divMonthly;
+    totalDivUsd += div;
+    if (doRe){
+      // 배당 재투자: 해당 월 배당으로 즉시 추가 매수(현재가로 가정)
+      sharesEnd += (div / price);
+    }
+  }
+
+  outShares.textContent = `${shares.toFixed(4)} shares`;
+  outMonthly.textContent = `${fmtUsd(monthlyDivUsd)} / month (est.)`;
+  outTotalDiv.textContent = `${fmtUsd(totalDivUsd)} (est.)`;
+  outSharesEnd.textContent = doRe ? `${sharesEnd.toFixed(4)} shares` : "— (reinvest off)";
+
+  // 참고로 TTM 기반이라는 걸 더 체감시키고 싶으면:
+  // (ttmDiv 있으면) "연간 배당(추정)"도 출력 가능
+}
 
 load().catch(err => {
   console.error(err);
   document.getElementById("asof").textContent = "Data load error. Check if data/jepq.json exists.";
 });
+
 
 
 
