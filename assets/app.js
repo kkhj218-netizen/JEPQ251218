@@ -80,13 +80,14 @@ function ensureChart(){
     height: el.clientHeight,
   });
 
-  candleSeries = chart.addCandlestickSeries({
-    upColor: "rgba(34,197,94,.95)",
-    downColor: "rgba(239,68,68,.95)",
-    borderVisible: false,
-    wickUpColor: "rgba(34,197,94,.95)",
-    wickDownColor: "rgba(239,68,68,.95)",
-  });
+candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
+  upColor: "rgba(34,197,94,.95)",
+  downColor: "rgba(239,68,68,.95)",
+  borderVisible: false,
+  wickUpColor: "rgba(34,197,94,.95)",
+  wickDownColor: "rgba(239,68,68,.95)",
+});
+
 
   volSeries = chart.addHistogramSeries({
     priceFormat: { type: "volume" },
@@ -183,4 +184,5 @@ load().catch(err => {
   console.error(err);
   document.getElementById("asof").textContent = "Data load error. Check if data/jepq.json exists.";
 });
+
 
