@@ -540,3 +540,75 @@ load().catch(err => {
   const asof = document.getElementById("asof");
   if (asof) asof.textContent = "데이터 로드 오류: data/jepq.json 경로를 확인해줘.";
 });
+
+// ===============================
+// Events Board (options / futures)
+// ===============================
+const EVENTS_URL = "/JEPQ251218/data/events.json";
+
+function ddayLabel(yyyy_mm_dd){
+  const today = new Date();
+  const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const [y,m,d] = yyyy_mm_dd.split("-").map(Number);
+  const t1 = new Date(y, m-1, d);
+  const diff = Math.round((t1 - t0) / (1000*60*60*24));
+  if (diff === 0) return "D-DAY";
+  if (diff > 0) return `D-${diff}`;
+  return `D+${Math.abs(diff)}`;
+}
+
+function renderEventsBoard(events){
+  const board = document.getElementById("eventsBoard");
+  if (!board) return;
+
+  board.innerHTML = "";
+  const top = (events || []).slice(0, 10);
+
+  if (!top.length){
+    board.innerHTML = `
+      <div class="event-card">
+        <div class="event-title">이벤트 데이터가 없습니다</div>
+      </div>`;
+    return;
+  }
+
+  for (const e of top){
+    const badgeCls = e.type === "options" ? "badge-opt" : "badge-fut";
+    const badgeTxt = e.type === "options" ? "OPTIONS" : "FUTURES";
+
+    const card = document.createElement("div");
+    card.className = "event-card";
+    card.innerHTML = `
+      <div class="event-top">
+        <span class="badge ${badgeCls}">${badgeTxt}</span>
+        <span class="dday">${ddayLabel(e.date)}</span>
+      </div>
+      <div class="event-title">${e.title}</div>
+      <div class="event-date">${e.date}</div>
+      <div class="event-note">${e.note || ""}</div>
+    `;
+    board.appendChild(card);
+  }
+}
+
+async function loadEvents(){
+  try{
+    const res = await fetch(EVENTS_URL, { cache:"no-store" });
+    if (!res.ok) throw new Error("events.json load fail");
+    const data = await res.json();
+    renderEventsBoard(data.events || []);
+  }catch(err){
+    console.error(err);
+    const board = document.getElementById("eventsBoard");
+    if (board){
+      board.innerHTML = `
+        <div class="event-card">
+          <div class="event-title">events.json 로드 오류</div>
+        </div>`;
+    }
+  }
+}
+loadEvents();
+ㄹ
+
+
