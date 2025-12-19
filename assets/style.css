@@ -622,6 +622,112 @@ body{
   margin-top: 8px;
   line-height: 1.4;
 }
+/* =========================
+   Panel helpers (없으면 추가)
+========================= */
+.panel { margin-top: 14px; }
+.panel-header h2 { margin: 0 0 4px; font-size: 16px; }
+.panel-desc { margin: 0; font-size: 12px; opacity: 0.75; }
+
+/* =========================
+   Today Investment Tone
+========================= */
+.tone-box{
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.tone-status{
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.tone-status.neutral{ color:#facc15; }  /* 🟡 */
+.tone-status.safe{ color:#93c5fd; }     /* 🔵 */
+.tone-status.risk{ color:#fca5a5; }     /* 🔴 */
+
+.tone-actions{
+  list-style:none;
+  padding:0;
+  margin:0;
+  font-size:14px;
+}
+.tone-actions li{ margin: 0 0 4px; }
+
+.tone-reason{
+  margin-top: 10px;
+  font-size: 13px;
+  opacity: 0.82;
+  line-height: 1.45;
+}
+
+/* =========================
+   Events Board
+========================= */
+.events-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.event-card{
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display:flex;
+  flex-direction:column;
+  gap: 6px;
+}
+
+.event-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.badge{
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+}
+
+.badge-opt{ color:#93c5fd; }
+.badge-fut{ color:#fca5a5; }
+
+.dday{
+  font-size: 12px;
+  font-weight: 700;
+  color:#facc15;
+}
+
+.event-title{
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.event-date{
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.event-note{
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+@media (max-width:480px){
+  .events-grid{ grid-template-columns: 1fr; }
+}
+
 
 
 
