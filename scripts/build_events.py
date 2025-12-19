@@ -1,7 +1,7 @@
 import json
 from datetime import date, timedelta
 
-OUT_PATH = "data/events.json"
+OUT_PATH = "JEPQ251218/data/events.json"
 
 def third_friday(year: int, month: int) -> date:
     d = date(year, month, 1)
