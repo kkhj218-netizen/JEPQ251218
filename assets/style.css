@@ -74,6 +74,10 @@ body{
 
   align-items: start; /* 🔥 왼쪽 빈 공간 제거 핵심 */
 }
+.chart-card{
+  align-self: start;
+}
+
 .card{
   background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
   border:1px solid rgba(255,255,255,.08);
@@ -319,4 +323,5 @@ body{
   .sim .row2{ grid-template-columns:1fr; }
   .sim-out{ grid-template-columns:1fr; }
 }
+
 
