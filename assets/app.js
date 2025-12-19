@@ -1,4 +1,4 @@
-const DATA_URL = "data/jepq.json";
+const DATA_URL = "/JEPQ251218/data/jepq.json";
 
 let raw = null;
 let chart = null;
@@ -183,3 +183,4 @@ load().catch(err => {
   console.error(err);
   document.getElementById("asof").textContent = "Data load error. Check if data/jepq.json exists.";
 });
+
