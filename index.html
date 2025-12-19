@@ -4,33 +4,26 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <title>JEPQ Dashboard – 배당/차트/시뮬레이터</title>
-  <meta name="description" content="JEPQ 캔들+볼륨 차트, 52주 위치, 배당(TTM) 요약, 배당 시뮬레이터까지 한 번에." />
+  <title>JEPQ 행동 중심 배당 리포트</title>
+  <meta name="description" content="JEPQ 투자자를 위한 행동 중심 대시보드: 오늘 한 줄 결론, 이벤트 D-Day 영향도, 개인 포지션, 이상 신호, 배당 시뮬레이터까지." />
 
-  <!-- Canonical -->
   <link rel="canonical" href="https://kkhj218-netizen.github.io/JEPQ251218/" />
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="JEPQ Dashboard – 배당/차트/시뮬레이터" />
-  <meta property="og:description" content="JEPQ 캔들+볼륨 차트, 52주 위치, 배당(TTM) 요약, 배당 시뮬레이터까지 한 번에." />
+  <meta property="og:title" content="JEPQ 행동 중심 배당 리포트" />
+  <meta property="og:description" content="오늘 한 줄 결론 + 이벤트 영향도 + 개인 포지션 + 이상 신호까지. 유료 리포트 감성의 JEPQ 전용 대시보드." />
   <meta property="og:url" content="https://kkhj218-netizen.github.io/JEPQ251218/" />
-
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary" />
-
-  <!-- Theme Color -->
   <meta name="theme-color" content="#0b1220" />
 
-  <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
     "@type":"SoftwareApplication",
-    "name":"JEPQ Dashboard",
+    "name":"JEPQ 행동 중심 배당 리포트",
     "applicationCategory":"FinanceApplication",
     "operatingSystem":"Web",
-    "description":"JEPQ 캔들+볼륨 차트, 52주 위치, 배당(TTM) 요약, 배당 시뮬레이터를 제공하는 웹 대시보드",
+    "description":"JEPQ 투자자를 위한 행동 중심 대시보드(오늘 결론/이벤트 D-Day/개인 포지션/이상 신호/배당 시뮬레이터)",
     "url":"https://kkhj218-netizen.github.io/JEPQ251218/"
   }
   </script>
@@ -45,7 +38,8 @@
       <div class="logo"></div>
       <div>
         <div class="title">JEPQ</div>
-        <div class="sub">Candles + Volume · Auto-updated (07:00 / 21:00 KST)</div>
+        <!-- (7) 브랜드 메시지 강화 -->
+        <div class="sub">가격보다 중요한 건, 지금 ‘어떻게’ 들고 가느냐 · Auto-updated (07:00 / 21:00 KST)</div>
       </div>
     </div>
 
@@ -62,7 +56,7 @@
   </header>
 
   <main class="grid">
-    <!-- LEFT: Chart -->
+    <!-- LEFT: Chart + Below -->
     <section class="card chart-card">
       <div class="card-head">
         <div class="left">
@@ -74,50 +68,103 @@
         </div>
       </div>
 
-      <div id="chart"></div>
+      <!-- (6) 모바일 차트 접기 -->
+      <button class="chart-toggle" id="chartToggle" type="button">차트 접기</button>
 
-      <div class="note">
-        ※ 1D/5D는 “일봉 데이터 기준”으로 최근 구간을 보여준다. (추후 분봉 수집으로 실제 1D 구현 가능)
+      <div id="chartWrap">
+        <div id="chart"></div>
+        <div class="note">
+          ※ 1D/5D는 “일봉 데이터 기준”으로 최근 구간을 보여준다. (추후 분봉 수집으로 실제 1D 구현 가능)
+        </div>
       </div>
+
+      <!-- ✅ (1) 오늘 한 줄 투자 결론: 차트 바로 아래(유료 느낌 핵심) -->
+      <section class="decision-card" id="decisionCard">
+        <div class="dc-title">📌 오늘의 JEPQ 결론</div>
+        <div class="dc-text" id="todayDecision">로딩 중…</div>
+        <div class="dc-sub" id="todayDecisionSub">—</div>
+      </section>
+
+      <!-- ✅ LEFT 필수 요약(오른쪽 핵심을 한 번에) -->
+      <section class="card below-card" id="belowCard">
+        <div class="card-head">
+          <div class="left">
+            <div class="h">필수 정보</div>
+            <div class="meta">오른쪽 핵심값을 요약해서 한 번에</div>
+          </div>
+        </div>
+
+        <div class="below-grid">
+          <div class="mini-card">
+            <div class="k">종가</div>
+            <div class="v" id="lClose">—</div>
+          </div>
+
+          <div class="mini-card">
+            <div class="k">TTM 배당률(추정)</div>
+            <div class="v" id="lTtmYield">—</div>
+          </div>
+
+          <div class="mini-card">
+            <div class="k">다음 이벤트</div>
+            <div class="v" id="lNextEvent">—</div>
+            <div class="s" id="lNextEventSub">—</div>
+          </div>
+
+          <div class="mini-card wide">
+            <div class="k">오늘의 톤</div>
+            <div class="v" id="lTone">—</div>
+            <div class="s" id="lToneReason">—</div>
+          </div>
+        </div>
+      </section>
     </section>
 
-    <!-- LEFT: Below summary card (fills the empty space) -->
-    <section class="card below-card" id="belowCard">
-      <div class="card-head">
-        <div class="left">
-          <div class="h">필수 정보</div>
-          <div class="meta">오른쪽 핵심값을 요약해서 한 번에</div>
-        </div>
-      </div>
-
-      <div class="below-grid">
-        <div class="mini-card">
-          <div class="k">종가</div>
-          <div class="v" id="lClose">—</div>
-        </div>
-
-        <div class="mini-card">
-          <div class="k">TTM 배당률(추정)</div>
-          <div class="v" id="lTtmYield">—</div>
-        </div>
-
-        <div class="mini-card">
-          <div class="k">다음 이벤트</div>
-          <div class="v" id="lNextEvent">—</div>
-          <div class="s" id="lNextEventSub">—</div>
-        </div>
-
-        <div class="mini-card wide">
-          <div class="k">오늘의 톤</div>
-          <div class="v" id="lTone">—</div>
-          <div class="s" id="lToneReason">—</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RIGHT: Stats / Dividends / Tone / Events / Simulator -->
+    <!-- RIGHT -->
     <aside class="card stats">
       <div class="h">핵심 지표</div>
+
+      <!-- (5) 이상 신호 알림 배지 -->
+      <section class="panel" id="alertsPanel">
+        <div class="panel-header">
+          <h2>⚠️ 이상 신호</h2>
+          <p class="panel-desc">오늘 감지된 리스크 신호 요약</p>
+        </div>
+        <div class="alerts-box" id="alertsBox">로딩 중…</div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- (3) 내 보유가 기준이면? (LocalStorage 개인화) -->
+      <section class="panel" id="positionPanel">
+        <div class="panel-header">
+          <h2>👤 내 포지션 기준</h2>
+          <p class="panel-desc">로그인 없이 기기에 저장(LocalStorage)</p>
+        </div>
+
+        <div class="pos-form">
+          <label class="pf">
+            <span>내 평균 매수가 (USD)</span>
+            <input id="myAvgPrice" type="number" step="0.01" inputmode="decimal" placeholder="예: 54.20" />
+          </label>
+          <label class="pf">
+            <span>보유 수량 (shares)</span>
+            <input id="myShares" type="number" step="0.0001" inputmode="decimal" placeholder="예: 12.5" />
+          </label>
+          <div class="row2">
+            <button class="btn-secondary" id="savePos" type="button">저장</button>
+            <button class="btn-ghost" id="resetPos" type="button">초기화</button>
+          </div>
+
+          <div class="pos-out" id="posOut">
+            <div class="po"><div class="k">현재 수익률</div><div class="v" id="myPnlPct">—</div></div>
+            <div class="po"><div class="k">손익(USD)</div><div class="v" id="myPnlUsd">—</div></div>
+            <div class="po wide"><div class="k">배당 관점 코멘트</div><div class="v" id="myPosComment">—</div></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
 
       <!-- 52W Position -->
       <div class="stat">
@@ -138,16 +185,23 @@
         <div class="pos52-desc">
           <div class="pos52-callout">
             <span class="tag" id="pos52Tag">—</span>
-            <div class="msg">
-              52주 위치를 계산 중입니다.
-            </div>
+            <div class="msg">—</div>
           </div>
         </div>
       </div>
 
+      <!-- (4) 52주 위치 → 과거 동일 구간 성과(없으면 준비중) -->
+      <section class="panel" id="pos52StatsPanel">
+        <div class="panel-header">
+          <h2>📊 과거 동일 구간 성과</h2>
+          <p class="panel-desc">같은 구간 진입 후 평균 흐름(데이터 확장 가능)</p>
+        </div>
+        <div class="pos52-stats" id="pos52Stats">로딩 중…</div>
+      </section>
+
       <div class="divider"></div>
 
-      <!-- Today Investment Tone -->
+      <!-- (6) 오늘의 톤 -->
       <section class="panel tone-panel" id="tonePanel">
         <div class="panel-header">
           <h2>📍 오늘의 JEPQ 투자 톤</h2>
@@ -156,102 +210,49 @@
 
         <div class="tone-box">
           <div class="tone-status" id="toneStatus">—</div>
-
           <ul class="tone-actions" id="toneActions">
             <li>신규 진입: —</li>
             <li>기존 보유: —</li>
             <li>분할 매수: —</li>
           </ul>
-
           <div class="tone-reason" id="toneReason">—</div>
         </div>
       </section>
 
-      <!-- Events Board -->
+      <!-- (2) D-Day 이벤트 영향도 배지 + 과거 변동성 한 줄 -->
       <section class="panel" id="eventsPanel">
         <div class="panel-header">
           <h2>📅 주요 이벤트 D-Day</h2>
-          <p class="panel-desc">선물/옵션 만기 등 변동성 트리거 요약</p>
+          <p class="panel-desc">만기/변동성 트리거 (영향도 + 과거 평균 변동성)</p>
         </div>
 
-        <div id="eventsBoard" class="events-grid"></div>
+        <div id="eventsBoard" class="events-grid events-scroll">
+          <!-- JS inserts cards -->
+        </div>
       </section>
 
+      <div class="divider"></div>
+
       <!-- Key Stats -->
-      <div class="stat">
-        <div class="k">52주 범위</div>
-        <div class="v" id="range52">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">당일 범위</div>
-        <div class="v" id="range1d">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">거래량</div>
-        <div class="v" id="vol">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">종가</div>
-        <div class="v" id="close">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">등락</div>
-        <div class="v" id="chg">—</div>
-      </div>
+      <div class="stat"><div class="k">52주 범위</div><div class="v" id="range52">—</div></div>
+      <div class="stat"><div class="k">당일 범위</div><div class="v" id="range1d">—</div></div>
+      <div class="stat"><div class="k">거래량</div><div class="v" id="vol">—</div></div>
+      <div class="stat"><div class="k">종가</div><div class="v" id="close">—</div></div>
+      <div class="stat"><div class="k">등락</div><div class="v" id="chg">—</div></div>
 
       <div class="divider"></div>
 
       <!-- Dividends -->
       <div class="h2">배당 요약</div>
-
-      <div class="stat">
-        <div class="k">최근 배당</div>
-        <div class="v" id="lastDiv">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">최근 12개월 배당 합계</div>
-        <div class="v" id="ttmDiv">—</div>
-      </div>
-      <div class="stat">
-        <div class="k">TTM 배당률(추정)</div>
-        <div class="v" id="ttmYield">—</div>
-      </div>
-
+      <div class="stat"><div class="k">최근 배당</div><div class="v" id="lastDiv">—</div></div>
+      <div class="stat"><div class="k">최근 12개월 배당 합계</div><div class="v" id="ttmDiv">—</div></div>
+      <div class="stat"><div class="k">TTM 배당률(추정)</div><div class="v" id="ttmYield">—</div></div>
       <div class="mini-list" id="divList"></div>
-
-      <div class="divider"></div>
-
-      <!-- Personas -->
-      <div class="h2">지금 구간 해석</div>
-
-      <div class="persona-grid">
-        <div class="persona">
-          <div class="t">초보 투자자</div>
-          <div class="d">
-            상단 구간에서는 한 번에 전액보다 <b>분할 매수</b>가 리스크 관리에 유리합니다.
-            배당 ETF는 타이밍보다 <b>유지 기간</b>이 중요합니다.
-          </div>
-        </div>
-        <div class="persona">
-          <div class="t">장기 배당 투자자</div>
-          <div class="d">
-            가격 변동에 과도하게 반응하기보다 <b>배당 흐름</b>과 <b>재투자</b> 관점이 유효합니다.
-          </div>
-        </div>
-        <div class="persona">
-          <div class="t">공격형 투자자</div>
-          <div class="d">
-            상단 구간에서는 추격보다 <b>조정 시 분할 접근</b>이 합리적일 수 있습니다.
-            배당과 가격 리스크를 함께 봐야 합니다.
-          </div>
-        </div>
-      </div>
 
       <div class="divider"></div>
 
       <!-- Simulator -->
       <div class="h2">배당 시뮬레이터</div>
-
       <div class="sim">
         <label class="f">
           <span>투자금 (KRW)</span>
@@ -283,22 +284,10 @@
         <button class="btn-primary full" id="calcBtn">계산하기</button>
 
         <div class="sim-out">
-          <div class="o">
-            <div class="k">예상 보유수량</div>
-            <div class="v" id="outShares">—</div>
-          </div>
-          <div class="o">
-            <div class="k">월 평균 배당(추정)</div>
-            <div class="v" id="outMonthly">—</div>
-          </div>
-          <div class="o">
-            <div class="k">기간 누적 배당(추정)</div>
-            <div class="v" id="outTotalDiv">—</div>
-          </div>
-          <div class="o">
-            <div class="k">재투자 후 수량(추정)</div>
-            <div class="v" id="outSharesEnd">—</div>
-          </div>
+          <div class="o"><div class="k">예상 보유수량</div><div class="v" id="outShares">—</div></div>
+          <div class="o"><div class="k">월 평균 배당(추정)</div><div class="v" id="outMonthly">—</div></div>
+          <div class="o"><div class="k">기간 누적 배당(추정)</div><div class="v" id="outTotalDiv">—</div></div>
+          <div class="o"><div class="k">재투자 후 수량(추정)</div><div class="v" id="outSharesEnd">—</div></div>
         </div>
 
         <div class="hint">
@@ -314,26 +303,26 @@
         본 정보는 투자 판단을 돕기 위한 참고 자료이며 투자 권유가 아닙니다.
       </div>
     </aside>
+
+    <!-- SEO Section: 맨 아래(검색/애드센스용) -->
+    <section class="seo card">
+      <h2>JEPQ 투자자를 위한 “행동 중심 배당 리포트”</h2>
+      <p>
+        이 페이지는 JEPQ 월배당 ETF의 가격 흐름, 거래량, 52주 위치, 배당 관련 데이터를
+        하루 2회 자동 업데이트(KST 07:00 / 21:00)로 제공합니다.
+      </p>
+      <p>
+        ‘오늘 한 줄 결론’과 ‘이벤트 영향도’로
+        지금 구간에서의 행동을 빠르게 결정할 수 있도록 돕는 것을 목표로 합니다.
+      </p>
+      <p class="seo-kws">
+        관련 키워드: JEPQ 배당, JEPQ 월배당, 배당 ETF, 옵션 만기, 선물 만기, 52주 위치, 배당 재투자
+      </p>
+    </section>
   </main>
 
-  <!-- ✅ SEO Section: grid 밖으로 분리 (레이아웃 깨짐 방지) -->
-  <section class="seo card">
-    <h2>JEPQ 배당 투자자를 위한 데이터 해석 허브</h2>
-    <p>
-      이 페이지는 JEPQ 월배당 ETF의 가격 흐름, 거래량, 52주 위치, 배당 관련 데이터를
-      하루 2회 자동 업데이트(KST 07:00 / 21:00)로 제공합니다.
-    </p>
-    <p>
-      단순한 가격 정보가 아니라, 배당 투자 관점에서 현재 구간을 해석할 수 있도록
-      핵심 지표를 정리해 보여주는 정보 허브를 목표로 합니다.
-    </p>
-    <p class="seo-kws">
-      관련 키워드: JEPQ 배당, JEPQ 월배당, 52주 위치, 배당 ETF 투자 전략, 배당 재투자
-    </p>
-  </section>
-
   <footer class="footer">
-    <span>© JEPQ Dashboard</span>
+    <span>© JEPQ 행동 중심 배당 리포트</span>
   </footer>
 
   <script src="assets/app.js"></script>
