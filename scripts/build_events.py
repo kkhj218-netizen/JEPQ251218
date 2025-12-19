@@ -1,0 +1,40 @@
+name: Update events.json
+
+on:
+  workflow_dispatch:
+  schedule:
+    # KST 07:05 = UTC 22:05 (전날)
+    - cron: "5 22 * * *"
+    # KST 21:05 = UTC 12:05
+    - cron: "5 12 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build events.json
+        run: |
+          python scripts/build_events.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/events.json
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "chore: update events.json"
+            git push
+          fi
