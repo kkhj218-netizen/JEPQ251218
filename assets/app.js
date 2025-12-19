@@ -1,10 +1,21 @@
-const DATA_URL = "/JEPQ251218/data/jepq.json";
+/* =========================
+   JEPQ Dashboard app.js (FULL)
+   - includes:
+     (1) Today Investment Tone
+     (2) Events D-Day Board
+========================= */
+
+const DATA_URL   = "/JEPQ251218/data/jepq.json";
+const EVENTS_URL = "/JEPQ251218/data/events.json";
 
 let raw = null;
 let chart = null;
 let candleSeries = null;
 let volSeries = null;
 
+/* =========================
+   Format helpers
+========================= */
 function fmtNum(n){
   if (n === null || n === undefined || Number.isNaN(n)) return "—";
   return Number(n).toLocaleString("en-US");
@@ -22,6 +33,153 @@ function fmtPct(n){
   return `${Number(n).toFixed(2)}%`;
 }
 
+/* =========================
+   Tone + Events (ADD)
+========================= */
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+function daysUntil(yyyy_mm_dd) {
+  const today = new Date();
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const [y,m,d] = String(yyyy_mm_dd).split("-").map(Number);
+  const target = new Date(y, m-1, d);
+  return Math.round((target - t) / (1000*60*60*24));
+}
+
+/* ---------- (2) Events Board ---------- */
+async function loadEventsJson() {
+  const res = await fetch(EVENTS_URL, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to load ${EVENTS_URL}`);
+  return await res.json();
+}
+
+function renderEventsBoard(payload) {
+  const wrap = document.getElementById("eventsBoard");
+  if (!wrap) return;
+
+  const items = (payload?.events || [])
+    .map(e => ({ ...e, dday: daysUntil(e.date) }))
+    .filter(e => e.dday >= -1)
+    .sort((a,b) => a.dday - b.dday)
+    .slice(0, 8);
+
+  if (!items.length) {
+    wrap.innerHTML = `<div style="opacity:.7;font-size:13px;">이벤트 데이터가 아직 없습니다.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = items.map(e => {
+    const tag = e.dday === 0 ? "D-DAY" : (e.dday > 0 ? `D-${e.dday}` : `D+${Math.abs(e.dday)}`);
+    const badgeClass = (e.category || "").includes("선물") ? "badge-fut" : "badge-opt";
+
+    return `
+      <div class="event-card">
+        <div class="event-top">
+          <span class="badge ${badgeClass}">${e.category || "이벤트"}</span>
+          <span class="dday">${tag}</span>
+        </div>
+        <div class="event-title">${e.title || "-"}</div>
+        <div class="event-date">${e.date || "-"}</div>
+        ${e.note ? `<div class="event-note">${e.note}</div>` : ""}
+      </div>
+    `;
+  }).join("");
+}
+
+async function initEventsBoard(){
+  try{
+    const payload = await loadEventsJson();
+    renderEventsBoard(payload);
+  }catch(e){
+    console.warn(e);
+    const wrap = document.getElementById("eventsBoard");
+    if (wrap) wrap.innerHTML = `<div style="opacity:.7;font-size:13px;">events.json 로드 실패</div>`;
+  }
+}
+
+/* ---------- (1) Today Investment Tone ---------- */
+function computeTone(summary = {}, derived = {}) {
+  // 유연하게 읽기
+  const pos52 = (derived?.pos_52w_pct ?? derived?.pos52 ?? null); // 0~100
+  const riskScore = (derived?.risk_score ?? derived?.score ?? null); // 0~100 가정
+  const volPct = (derived?.vol_vs_avg_pct ?? derived?.volume_vs_avg_pct ?? null); // 평균 대비 %
+  const dayChg = (summary?.change_pct ?? summary?.pct_change ?? null); // %
+
+  let score = 50;
+  const reasons = [];
+
+  if (typeof riskScore === "number") {
+    score = riskScore;
+    reasons.push(`리스크 점수 ${Math.round(riskScore)}`);
+  }
+
+  if (typeof pos52 === "number") {
+    if (pos52 >= 85) { score += 12; reasons.push(`52주 상단(${Math.round(pos52)}%)`); }
+    else if (pos52 <= 30) { score -= 8; reasons.push(`52주 하단(${Math.round(pos52)}%)`); }
+    else { reasons.push(`52주 중간(${Math.round(pos52)}%)`); }
+  }
+
+  if (typeof volPct === "number") {
+    if (volPct >= 30) { score += 10; reasons.push(`거래량 급증(+${Math.round(volPct)}%)`); }
+    else if (volPct >= 10) { score += 5; reasons.push(`거래량 증가(+${Math.round(volPct)}%)`); }
+  }
+
+  if (typeof dayChg === "number") {
+    if (dayChg <= -2) { score += 8; reasons.push(`당일 하락(${dayChg.toFixed(1)}%)`); }
+    else if (dayChg >= 2) { score -= 4; reasons.push(`당일 상승(+${dayChg.toFixed(1)}%)`); }
+  }
+
+  score = clamp(score, 0, 100);
+
+  let toneLabel = "🟡 중립 (관망 우세)";
+  let toneClass = "neutral";
+  let action = { entry:"⚠️ 신중", hold:"⭕", dca:"⚠️ 신중" };
+
+  if (score <= 30) {
+    toneLabel = "🔵 안정 (적립 유리)";
+    toneClass = "safe";
+    action = { entry:"⭕", hold:"⭕", dca:"⭕" };
+  } else if (score <= 60) {
+    toneLabel = "🟡 중립 (관망 우세)";
+    toneClass = "neutral";
+    action = { entry:"⚠️ 신중", hold:"⭕", dca:"⚠️ 신중" };
+  } else {
+    toneLabel = "🔴 경계 (리스크 관리)";
+    toneClass = "risk";
+    action = { entry:"❌", hold:"⚠️ 점검", dca:"❌" };
+  }
+
+  const reasonText = reasons.length
+    ? reasons.slice(0,3).map(r => `· ${r}`).join("<br/>")
+    : "· 데이터 수집 중 (곧 자동 요약 표시)";
+
+  return { score, toneLabel, toneClass, action, reasonText };
+}
+
+function renderTone(summary, derived) {
+  const statusEl = document.getElementById("toneStatus");
+  const actionsEl = document.getElementById("toneActions");
+  const reasonEl = document.getElementById("toneReason");
+  if (!statusEl || !actionsEl || !reasonEl) return;
+
+  const t = computeTone(summary, derived);
+
+  statusEl.textContent = t.toneLabel;
+  statusEl.classList.remove("safe","neutral","risk");
+  statusEl.classList.add(t.toneClass);
+
+  actionsEl.innerHTML = `
+    <li>신규 진입: ${t.action.entry}</li>
+    <li>기존 보유: ${t.action.hold}</li>
+    <li>분할 매수: ${t.action.dca}</li>
+  `;
+
+  reasonEl.innerHTML = t.reasonText;
+}
+
+/* =========================
+   Timeframe slicing
+========================= */
 function sliceByTF(series, tf){
   if (!series?.length) return [];
 
@@ -46,6 +204,9 @@ function sliceByTF(series, tf){
   return series;
 }
 
+/* =========================
+   Chart
+========================= */
 function ensureChart(){
   const el = document.getElementById("chart");
   if (!el) return;
@@ -64,7 +225,6 @@ function ensureChart(){
     height: el.clientHeight,
   });
 
-  // ✅ v5 방식
   candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
     upColor: "rgba(34,197,94,.95)",
     downColor: "rgba(239,68,68,.95)",
@@ -87,6 +247,9 @@ function ensureChart(){
   });
 }
 
+/* =========================
+   Render stats
+========================= */
 function renderStats(summary){
   const asofEl = document.getElementById("asof");
   if (asofEl){
@@ -142,9 +305,6 @@ function renderStats(summary){
 
 /**
  * ✅ 52W Position + 태그 + 문구 자동 변경
- * - index.html에 아래 요소들이 있어야 함:
- *   pos52Low, pos52High, pos52Txt, pos52Fill, pos52Dot, pos52Tag
- * - 그리고 콜아웃 본문: .pos52-callout .msg
  */
 function render52wPosition(summary, derived){
   const pos = derived?.pos_52w_pct; // 0~100
@@ -208,14 +368,12 @@ function render52wPosition(summary, derived){
   }
 }
 
-
 function renderDividends(divSummary, dividends){
   const lastDivEl = document.getElementById("lastDiv");
   const ttmDivEl = document.getElementById("ttmDiv");
   const ttmYieldEl = document.getElementById("ttmYield");
   const listEl = document.getElementById("divList");
 
-  // HTML 없으면 패스
   if (!lastDivEl || !ttmDivEl || !ttmYieldEl || !listEl) return;
 
   const lastAmt = divSummary?.last_dividend;
@@ -283,7 +441,6 @@ function calcSimulator(raw){
 
   const usd = inv / fxv;
   const shares0 = usd / price;
-
   const monthlyDivUsd0 = shares0 * divMonthly;
 
   let totalDivUsd = 0;
@@ -321,6 +478,9 @@ function setData(series){
   chart.timeScale().fitContent();
 }
 
+/* =========================
+   Main load
+========================= */
 async function load(){
   const res = await fetch(DATA_URL, { cache: "no-store" });
   if (!res.ok) throw new Error(`Failed to load ${DATA_URL}`);
@@ -334,6 +494,12 @@ async function load(){
   renderStats(raw.summary);
   render52wPosition(raw.summary, raw.derived);
   renderDividends(raw.dividend_summary, raw.dividends);
+
+  // ✅ (1) 오늘의 투자 톤 자동 생성
+  renderTone(raw.summary, raw.derived);
+
+  // ✅ (2) 이벤트 D-Day 보드 로딩
+  initEventsBoard();
 
   // default 1Y
   setData(sliceByTF(raw.series, "1Y"));
@@ -374,4 +540,3 @@ load().catch(err => {
   const asof = document.getElementById("asof");
   if (asof) asof.textContent = "데이터 로드 오류: data/jepq.json 경로를 확인해줘.";
 });
-
