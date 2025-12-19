@@ -291,3 +291,111 @@ body{
   .sim .row2{ grid-template-columns: 1fr; }
   .sim-out{ grid-template-columns: 1fr; }
 }
+/* === readability patch (append at end) === */
+
+/* 공통: 작은 설명 글 가독성 */
+.pos52-desc,
+.persona .d{
+  color: rgba(229,231,235,.92);
+  line-height: 1.65;
+  letter-spacing: -0.2px;
+}
+
+/* 52주 위치 영역 */
+.pos52{
+  margin-top: 12px;
+}
+
+.pos52 .minmax{
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  color: rgba(229,231,235,.85);
+  font-size: 13px;
+}
+
+/* 콜아웃 박스: 설명을 “한눈에” */
+.pos52-callout{
+  margin-top: 12px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+
+.pos52-callout .tag{
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: rgba(255,255,255,.92);
+  background: rgba(251,146,60,.15);
+  border: 1px solid rgba(251,146,60,.35);
+}
+
+.pos52-callout .msg{
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+.pos52-callout b{
+  color: #fff;
+  font-weight: 900;
+}
+
+/* 52W 위치 구간별 태그 컬러 (JS에서 class를 붙일 예정) */
+.pos52-callout .tag.is-low{
+  background: rgba(59,130,246,.16);
+  border-color: rgba(59,130,246,.40);
+}
+.pos52-callout .tag.is-mid{
+  background: rgba(34,197,94,.14);
+  border-color: rgba(34,197,94,.40);
+}
+.pos52-callout .tag.is-high{
+  background: rgba(251,146,60,.15);
+  border-color: rgba(251,146,60,.35);
+}
+
+/* “지금 구간 해석” 카드: 모바일 가독성 */
+.persona-grid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.persona{
+  padding: 14px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+}
+
+.persona .t{
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+  color: rgba(255,255,255,.95);
+}
+
+.persona .d{
+  font-size: 14px;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+/* 데스크탑에서는 3열 */
+@media (min-width: 980px){
+  .persona-grid{ grid-template-columns: repeat(3, 1fr); }
+}
+
