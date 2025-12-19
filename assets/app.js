@@ -5,8 +5,8 @@
      (2) Events D-Day Board (badge/type + sort + filter)
 ========================= */
 
-const DATA_URL   = "/JEPQ251218/data/jepq.json";
-const EVENTS_URL = "/JEPQ251218/data/events.json";
+const DATA_URL   = "data/jepq.json";
+const EVENTS_URL = "data/events.json";
 
 let raw = null;
 let chart = null;
@@ -563,3 +563,4 @@ load().catch(err => {
   const asof = document.getElementById("asof");
   if (asof) asof.textContent = "데이터 로드 오류: data/jepq.json 경로를 확인해줘.";
 });
+
