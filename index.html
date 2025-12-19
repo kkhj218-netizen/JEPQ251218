@@ -114,6 +114,37 @@
 
 
       <div class="divider"></div>
+<!-- Today Investment Tone -->
+<section class="panel tone-panel" id="tonePanel">
+  <div class="panel-header">
+    <h2>📍 오늘의 JEPQ 투자 톤</h2>
+    <p class="panel-desc">지표를 종합한 오늘의 행동 가이드</p>
+  </div>
+
+  <div class="tone-box">
+    <div class="tone-status" id="toneStatus">—</div>
+
+    <ul class="tone-actions" id="toneActions">
+      <li>신규 진입: —</li>
+      <li>기존 보유: —</li>
+      <li>분할 매수: —</li>
+    </ul>
+
+    <div class="tone-reason" id="toneReason">—</div>
+  </div>
+</section>
+
+<!-- Events Board -->
+<section class="panel" id="eventsPanel">
+  <div class="panel-header">
+    <h2>📅 주요 이벤트 D-Day</h2>
+    <p class="panel-desc">선물/옵션 만기 등 변동성 트리거 요약</p>
+  </div>
+
+  <div id="eventsBoard" class="events-grid">
+    <!-- JS가 카드 삽입 -->
+  </div>
+</section>
 
       <!-- Key Stats -->
       <div class="stat">
@@ -316,5 +347,6 @@
   <script src="assets/app.js"></script>
 </body>
 </html>
+
 
 
