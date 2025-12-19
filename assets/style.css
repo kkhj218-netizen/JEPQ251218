@@ -580,5 +580,48 @@ body{
   }
 }
 
+/* =========================
+   Today Investment Tone
+========================= */
+
+.tone-panel {
+  margin-top: 12px;
+}
+
+.tone-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.tone-status {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.tone-neutral {
+  color: #facc15;
+}
+
+.tone-actions {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.tone-actions li {
+  margin-bottom: 4px;
+}
+
+.tone-reason {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
 
 
