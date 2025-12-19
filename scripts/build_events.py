@@ -1,6 +1,8 @@
 import json
+import os
 from datetime import date, timedelta
 
+# ✅ GitHub Pages 기준 저장 위치
 OUT_PATH = "JEPQ251218/data/events.json"
 
 def third_friday(year: int, month: int) -> date:
@@ -27,8 +29,8 @@ def build_events(start: date, months_ahead: int = 12):
         events.append({
             "date": exp.isoformat(),
             "type": "options",
-            "title": f"옵션 만기 (3번째 금요일)",
-            "note": "만기 주간엔 변동성/거래량이 늘 수 있어요. (지표 급변 체크)"
+            "title": "옵션 만기 (3번째 금요일)",
+            "note": "만기 주간엔 변동성·거래량이 늘 수 있어요. (급변 지표 체크)"
         })
 
         # FUTURES: 분기(3,6,9,12)
@@ -36,18 +38,18 @@ def build_events(start: date, months_ahead: int = 12):
             events.append({
                 "date": exp.isoformat(),
                 "type": "futures",
-                "title": f"선물 만기 (분기 3번째 금요일)",
-                "note": "분기 만기 주간은 포지션 롤오버/수급 변화로 흔들릴 수 있어요."
+                "title": "선물 만기 (분기 3번째 금요일)",
+                "note": "분기 만기 주간은 롤오버·수급 변화로 변동성이 커질 수 있어요."
             })
 
-    # 날짜 기준 정렬 + 같은 날짜/타입 중복 제거
+    # 날짜 + 타입 기준 중복 제거
     uniq = {}
     for e in events:
-        key = (e["date"], e["type"], e["title"])
+        key = (e["date"], e["type"])
         uniq[key] = e
+
     events = list(uniq.values())
     events.sort(key=lambda x: x["date"])
-
     return events
 
 def main():
@@ -56,14 +58,12 @@ def main():
 
     payload = {
         "asof": today.isoformat(),
-        "timezone_note": "Dates are calendar dates (local display). D-Day is computed in browser local time.",
+        "timezone_note": "Dates are calendar dates. D-Day is computed in browser local time.",
         "events": events
     }
 
-    # 폴더 없으면(일반적으로는 존재) 대비
-   import os
-os.makedirs("JEPQ251218/data", exist_ok=True)
-
+    # ✅ 폴더 보장
+    os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
