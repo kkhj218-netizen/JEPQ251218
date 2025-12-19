@@ -1,4 +1,4 @@
-name: Update events.json
+name: Update JEPQ Data Pipeline
 
 on:
   workflow_dispatch:
@@ -24,9 +24,14 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Build events.json
+      - name: Install dependencies
         run: |
-          python scripts/build_events.py
+          python -m pip install --upgrade pip
+          pip install yfinance pandas numpy
+
+      - name: Run full data pipeline
+        run: |
+          python scripts/build_all.py
 
       - name: Commit & push if changed
         run: |
@@ -34,12 +39,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add data/events.json
+          git add data/
 
           if git diff --cached --quiet; then
             echo "No changes."
             exit 0
           fi
 
-          git commit -m "chore: update events.json"
+          git commit -m "chore: update JEPQ data pipeline"
           git push
