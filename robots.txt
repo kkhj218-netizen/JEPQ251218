@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kkhj218-netizen.github.io/JEPQ251218/sitemap.xml
