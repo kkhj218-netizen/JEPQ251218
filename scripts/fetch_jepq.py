@@ -1,155 +1,178 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+Fetch JEPQ price (daily candles) + dividends from Yahoo Finance public endpoints
+and write data/jepq.json (+ optional daily snapshot).
+No external deps.
+"""
 
-import os
-import json
-import math
-import datetime as dt
-from typing import Any, Dict, List, Optional
-import urllib.request
+import json, os, sys, math, datetime
+from urllib.request import urlopen, Request
+from urllib.error import URLError, HTTPError
 
+TICKER = os.environ.get("TICKER", "JEPQ").upper()
+OUT_PATH = os.environ.get("OUT_PATH", "data/jepq.json")
+HISTORY_DIR = os.environ.get("HISTORY_DIR", "history/jepq")
 
-TICKER = "JEPQ"
-OUT_DATA = os.path.join("data", "jepq.json")
-HIST_DIR = os.path.join("history", "jepq")
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
+def http_json(url: str):
+  req = Request(url, headers={"User-Agent": UA})
+  with urlopen(req, timeout=30) as r:
+    return json.loads(r.read().decode("utf-8"))
 
-def _http_get_json(url: str) -> Dict[str, Any]:
-    req = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                          "(KHTML, like Gecko) Chrome/120 Safari/537.36"
-        }
-    )
-    with urllib.request.urlopen(req, timeout=30) as r:
-        raw = r.read().decode("utf-8")
-    return json.loads(raw)
+def safe_num(x):
+  try:
+    if x is None: return None
+    if isinstance(x, bool): return None
+    v = float(x)
+    if math.isnan(v) or math.isinf(v): return None
+    return v
+  except:
+    return None
 
+def iso_from_unix(ts: int):
+  return datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
 
-def fetch_daily_ohlcv(ticker: str, range_str: str = "5y") -> List[Dict[str, Any]]:
-    # Yahoo chart endpoint (daily)
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range={range_str}&interval=1d&includePrePost=false"
-    data = _http_get_json(url)
+def utc_now():
+  return datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-    chart = data.get("chart", {})
-    if chart.get("error"):
-        raise RuntimeError(f"Yahoo chart error: {chart['error']}")
+def fetch_price_daily(ticker: str):
+  # daily candles up to 5y
+  url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range=5y&interval=1d&includePrePost=false&events=div%7Csplit"
+  j = http_json(url)
+  result = (j.get("chart") or {}).get("result") or []
+  if not result:
+    raise RuntimeError("No chart result (price).")
+  r0 = result[0]
 
-    result = (chart.get("result") or [None])[0]
-    if not result:
-        raise RuntimeError("No chart result from Yahoo")
+  ts = r0.get("timestamp") or []
+  ind = ((r0.get("indicators") or {}).get("quote") or [{}])[0]
+  opens = ind.get("open") or []
+  highs = ind.get("high") or []
+  lows  = ind.get("low")  or []
+  closes= ind.get("close")or []
+  vols  = ind.get("volume") or []
 
-    ts = result["timestamp"]  # unix seconds list
-    q = result["indicators"]["quote"][0]
+  series = []
+  for i, t in enumerate(ts):
+    o = safe_num(opens[i]) if i < len(opens) else None
+    h = safe_num(highs[i]) if i < len(highs) else None
+    l = safe_num(lows[i])  if i < len(lows)  else None
+    c = safe_num(closes[i])if i < len(closes)else None
+    v = safe_num(vols[i])  if i < len(vols)  else None
+    if c is None or o is None or h is None or l is None:
+      continue
+    series.append({
+      "time": int(t),              # unix seconds
+      "open": o, "high": h, "low": l, "close": c,
+      "volume": int(v) if v is not None else 0
+    })
 
-    opens = q.get("open", [])
-    highs = q.get("high", [])
-    lows = q.get("low", [])
-    closes = q.get("close", [])
-    vols = q.get("volume", [])
+  # dividends from the same response (events)
+  div_events = ((r0.get("events") or {}).get("dividends") or {})
+  dividends = []
+  for k, dv in div_events.items():
+    # dv: {'amount':..., 'date':..., ...}
+    dt = int(dv.get("date")) if dv.get("date") else None
+    amt = safe_num(dv.get("amount"))
+    if dt and amt is not None:
+      dividends.append({"time": dt, "date": iso_from_unix(dt), "amount": amt})
+  dividends.sort(key=lambda x: x["time"])
 
-    series: List[Dict[str, Any]] = []
-    for i, t in enumerate(ts):
-        o, h, l, c, v = opens[i], highs[i], lows[i], closes[i], vols[i]
-        # skip null rows
-        if o is None or h is None or l is None or c is None:
-            continue
-        series.append({
-            "time": int(t),
-            "open": float(o),
-            "high": float(h),
-            "low": float(l),
-            "close": float(c),
-            "volume": int(v) if v is not None else 0
-        })
-    return series
+  meta = r0.get("meta") or {}
+  summary = {
+    "asof": None,
+    "last_close": None,
+    "day_high": None,
+    "day_low": None,
+    "volume": None,
+    "range_52w_high": safe_num(meta.get("fiftyTwoWeekHigh")),
+    "range_52w_low":  safe_num(meta.get("fiftyTwoWeekLow")),
+    "change": None,
+    "change_pct": None,
+  }
 
-
-def iso_from_unix(unix_s: int) -> str:
-    return dt.datetime.utcfromtimestamp(unix_s).strftime("%Y-%m-%d")
-
-
-def safe_round(x: Optional[float], nd: int = 2) -> Optional[float]:
-    if x is None:
-        return None
-    if isinstance(x, float) and (math.isnan(x) or math.isinf(x)):
-        return None
-    return round(float(x), nd)
-
-
-def build_summary(series: List[Dict[str, Any]]) -> Dict[str, Any]:
-    if len(series) < 2:
-        return {
-            "asof": None,
-            "last_close": None,
-            "day_high": None,
-            "day_low": None,
-            "volume": None,
-            "range_52w_high": None,
-            "range_52w_low": None,
-            "change": None,
-            "change_pct": None,
-        }
-
+  if series:
     last = series[-1]
-    prev = series[-2]
+    summary["asof"] = iso_from_unix(last["time"])
+    summary["last_close"] = safe_num(last["close"])
+    summary["volume"] = int(last["volume"]) if last.get("volume") is not None else None
+    # "day range"는 마지막 캔들 기준(일봉)
+    summary["day_high"] = safe_num(last["high"])
+    summary["day_low"]  = safe_num(last["low"])
+    if len(series) >= 2:
+      prev = series[-2]
+      chg = safe_num(last["close"]) - safe_num(prev["close"])
+      summary["change"] = chg
+      summary["change_pct"] = (chg / safe_num(prev["close"]) * 100.0) if safe_num(prev["close"]) else None
 
-    last_close = last["close"]
-    prev_close = prev["close"]
-    chg = last_close - prev_close
-    chg_pct = (chg / prev_close) * 100 if prev_close else None
+  # 52주 위치 (0~100)
+  pos = None
+  if summary["last_close"] is not None and summary["range_52w_low"] is not None and summary["range_52w_high"] is not None:
+    lo = summary["range_52w_low"]
+    hi = summary["range_52w_high"]
+    if hi > lo:
+      pos = (summary["last_close"] - lo) / (hi - lo) * 100.0
+  derived = {"pos_52w_pct": pos}
 
-    # 52w ~= last 252 trading days (approx)
-    lookback = series[-252:] if len(series) >= 252 else series
-    range_52w_high = max(x["high"] for x in lookback)
-    range_52w_low = min(x["low"] for x in lookback)
+  # dividend summary (TTM)
+  div_summary = {
+    "last_dividend": None,
+    "last_dividend_date": None,
+    "ttm_dividend": None,
+    "ttm_yield_pct": None,
+    "monthly_avg_dividend": None,
+  }
+  if dividends and summary["last_close"] is not None:
+    last_div = dividends[-1]
+    div_summary["last_dividend"] = last_div["amount"]
+    div_summary["last_dividend_date"] = last_div["date"]
 
-    return {
-        "asof": iso_from_unix(last["time"]),
-        "last_close": safe_round(last_close, 2),
-        "day_high": safe_round(last["high"], 2),
-        "day_low": safe_round(last["low"], 2),
-        "volume": int(last.get("volume", 0)),
-        "range_52w_high": safe_round(range_52w_high, 2),
-        "range_52w_low": safe_round(range_52w_low, 2),
-        "change": safe_round(chg, 2),
-        "change_pct": safe_round(chg_pct, 2),
-    }
+    # TTM: 최근 365일 합
+    cutoff = series[-1]["time"] - 365 * 24 * 60 * 60 if series else (dividends[-1]["time"] - 365*24*60*60)
+    ttm = [d for d in dividends if d["time"] >= cutoff]
+    ttm_sum = sum(d["amount"] for d in ttm)
+    div_summary["ttm_dividend"] = ttm_sum
+    div_summary["monthly_avg_dividend"] = (ttm_sum / 12.0) if ttm_sum else None
+    div_summary["ttm_yield_pct"] = (ttm_sum / summary["last_close"] * 100.0) if summary["last_close"] else None
 
+  return series, summary, derived, dividends, div_summary
 
-def ensure_dirs():
-    os.makedirs(os.path.dirname(OUT_DATA), exist_ok=True)
-    os.makedirs(HIST_DIR, exist_ok=True)
-
-
-def write_json(path: str, obj: Any):
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(obj, f, ensure_ascii=False, indent=2)
-
+def ensure_dir(p):
+  if p and not os.path.exists(p):
+    os.makedirs(p, exist_ok=True)
 
 def main():
-    ensure_dirs()
+  ensure_dir(os.path.dirname(OUT_PATH) or ".")
+  ensure_dir(HISTORY_DIR)
 
-    series = fetch_daily_ohlcv(TICKER, range_str="5y")
-    summary = build_summary(series)
+  series, summary, derived, dividends, div_summary = fetch_price_daily(TICKER)
 
-    payload = {
-        "ticker": TICKER,
-        "updated_utc": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-        "summary": summary,
-        "series": series
-    }
+  payload = {
+    "ticker": TICKER,
+    "updated_utc": utc_now(),
+    "summary": summary,
+    "derived": derived,               # 52주 위치 등
+    "dividend_summary": div_summary,  # 배당 요약
+    "dividends": dividends,           # 배당 히스토리
+    "series": series                  # 캔들 시계열
+  }
 
-    # latest snapshot date
-    snap_date = summary.get("asof") or dt.datetime.utcnow().strftime("%Y-%m-%d")
-    snap_path = os.path.join(HIST_DIR, f"{snap_date}.json")
+  with open(OUT_PATH, "w", encoding="utf-8") as f:
+    json.dump(payload, f, ensure_ascii=False)
 
-    write_json(OUT_DATA, payload)
-    write_json(snap_path, payload)
+  # daily snapshot (optional)
+  if summary.get("asof"):
+    snap_path = os.path.join(HISTORY_DIR, f"{summary['asof']}.json")
+    with open(snap_path, "w", encoding="utf-8") as f:
+      json.dump(payload, f, ensure_ascii=False)
 
-    print(f"[OK] Updated {OUT_DATA} and snapshot {snap_path} (rows={len(series)})")
-
+  print(f"[OK] Updated {OUT_PATH} and snapshot {snap_path if summary.get('asof') else '(none)'} (rows={len(series)}, divs={len(dividends)})")
 
 if __name__ == "__main__":
+  try:
     main()
+  except Exception as e:
+    print("[ERR]", str(e))
+    sys.exit(1)
