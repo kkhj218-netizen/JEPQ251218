@@ -508,5 +508,77 @@ body{
   .pos52-callout .msg{ font-size: 14px; }
   .tag{ padding: 6px 9px; }
 }
+/* =========================
+   Events Board
+========================= */
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.event-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.event-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+}
+
+.badge-opt {
+  color: #93c5fd;
+}
+
+.badge-fut {
+  color: #fca5a5;
+}
+
+.dday {
+  font-size: 12px;
+  font-weight: 600;
+  color: #facc15;
+}
+
+.event-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.event-date {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.event-note {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+/* 모바일 대응 */
+@media (max-width: 480px) {
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 
