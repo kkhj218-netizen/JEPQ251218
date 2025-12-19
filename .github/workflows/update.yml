@@ -1,21 +1,22 @@
-name: Update JEPQ Data
+name: Update events.json
 
 on:
   workflow_dispatch:
   schedule:
-    # 07:00 KST (UTC 22:00 전날)
-    - cron: "0 22 * * *"
-    # 21:00 KST (UTC 12:00)
-    - cron: "0 12 * * *"
+    # KST 07:05 = UTC 22:05 (전날)
+    - cron: "5 22 * * *"
+    # KST 21:05 = UTC 12:05
+    - cron: "5 12 * * *"
 
 permissions:
   contents: write
 
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -23,18 +24,22 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Run data fetcher
+      - name: Build events.json
         run: |
-          python scripts/fetch_jepq.py
+          python scripts/build_events.py
 
-      - name: Commit and push if changed
+      - name: Commit & push if changed
         run: |
+          set -e
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/jepq.json history/jepq/*.json || true
+
+          git add data/events.json
+
           if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: update JEPQ data"
-            git push
+            echo "No changes."
+            exit 0
           fi
+
+          git commit -m "chore: update events.json"
+          git push
