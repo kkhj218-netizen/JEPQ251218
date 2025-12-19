@@ -70,23 +70,109 @@
     </section>
 
 <aside class="card stats">
-  <div class="h">Key Stats</div>
+  <div class="h">핵심 지표</div>
 
-  <!-- 52주 위치 -->
+  <!-- 52W Position -->
   <div class="stat">
-    <div class="k">52W Position</div>
-    <div class="v"><span id="pos52Txt">—</span></div>
+    <div class="k">52주 위치</div>
+    <div class="v" id="pos52Txt">—</div>
   </div>
-  <div class="posbar" aria-label="52 week position">
-    <div class="posbar-track">
-      <div class="posbar-fill" id="pos52Fill" style="width:0%"></div>
-      <div class="posbar-dot" id="pos52Dot" style="left:0%"></div>
+
+  <div class="pos52">
+    <div class="bar">
+      <div class="fill" id="pos52Fill"></div>
+      <div class="dot" id="pos52Dot"></div>
     </div>
-    <div class="posbar-meta">
+    <div class="minmax">
       <span id="pos52Low">—</span>
       <span id="pos52High">—</span>
     </div>
+    <div class="pos52-desc">
+      현재 JEPQ 가격은 최근 1년 가격 범위 기준 <b>상단 구간</b>에 위치해 있습니다.
+      상단 구간에서는 추격 매수보다는 <b>분할 접근</b>이 적합할 수 있습니다.
+    </div>
   </div>
+
+  <div class="divider"></div>
+
+  <!-- 기존 Key Stats -->
+  <div class="stat">
+    <div class="k">52주 범위</div>
+    <div class="v" id="range52">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">당일 범위</div>
+    <div class="v" id="range1d">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">거래량</div>
+    <div class="v" id="vol">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">종가</div>
+    <div class="v" id="close">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">등락</div>
+    <div class="v" id="chg">—</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 배당 카드 -->
+  <div class="h2">배당 요약</div>
+
+  <div class="stat">
+    <div class="k">최근 배당</div>
+    <div class="v" id="lastDiv">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">최근 12개월 배당 합계</div>
+    <div class="v" id="ttmDiv">—</div>
+  </div>
+  <div class="stat">
+    <div class="k">TTM 배당률(추정)</div>
+    <div class="v" id="ttmYield">—</div>
+  </div>
+
+  <div class="mini-list" id="divList"></div>
+
+  <div class="divider"></div>
+
+  <!-- 투자자 해석 카드 (3분기) -->
+  <div class="h2">지금 구간 해석</div>
+
+  <div class="persona-grid">
+    <div class="persona">
+      <div class="t">초보 투자자</div>
+      <div class="d">
+        상단 구간에서는 한 번에 전액보다 <b>분할 매수</b>가 리스크 관리에 유리합니다.
+        배당 ETF는 타이밍보다 <b>유지 기간</b>이 중요합니다.
+      </div>
+    </div>
+    <div class="persona">
+      <div class="t">장기 배당 투자자</div>
+      <div class="d">
+        가격 변동에 과도하게 반응하기보다 <b>배당 흐름</b>과 <b>재투자</b> 관점이 유효합니다.
+      </div>
+    </div>
+    <div class="persona">
+      <div class="t">공격형 투자자</div>
+      <div class="d">
+        상단 구간에서는 추격보다 <b>조정 시 분할 접근</b>이 합리적일 수 있습니다.
+        배당과 가격 리스크를 함께 봐야 합니다.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="small">
+    업데이트: <b>KST 07:00 / 21:00</b><br/>
+    데이터 출처: 공개 시장 데이터 기반 자동 수집(비공식).<br/>
+    본 정보는 투자 판단을 돕기 위한 참고 자료이며 투자 권유가 아닙니다.
+  </div>
+</aside>
 
   <div class="divider"></div>
 
@@ -209,5 +295,6 @@
   <script src="assets/app.js"></script>
 </body>
 </html>
+
 
 
