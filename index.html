@@ -64,6 +64,40 @@
   <main class="grid">
     <!-- Chart -->
     <section class="card chart-card">
+<!-- ✅ Chart 아래: 필수 정보 (LEFT) -->
+<section class="card below-card" id="belowCard">
+  <div class="card-head">
+    <div class="left">
+      <div class="h">필수 정보</div>
+      <div class="meta">오른쪽 핵심값을 요약해서 한 번에</div>
+    </div>
+  </div>
+
+  <div class="below-grid">
+    <div class="mini-card">
+      <div class="k">종가</div>
+      <div class="v" id="lClose">—</div>
+    </div>
+
+    <div class="mini-card">
+      <div class="k">TTM 배당률(추정)</div>
+      <div class="v" id="lTtmYield">—</div>
+    </div>
+
+    <div class="mini-card">
+      <div class="k">다음 이벤트</div>
+      <div class="v" id="lNextEvent">—</div>
+      <div class="s" id="lNextEventSub">—</div>
+    </div>
+
+    <div class="mini-card wide">
+      <div class="k">오늘의 톤</div>
+      <div class="v" id="lTone">—</div>
+      <div class="s" id="lToneReason">—</div>
+    </div>
+  </div>
+</section>
+
       <div class="card-head">
         <div class="left">
           <div class="h">Price</div>
@@ -308,3 +342,4 @@
   <script src="assets/app.js"></script>
 </body>
 </html>
+
